@@ -8,6 +8,10 @@ app.secret_key = 'ftygfuhijo123498joif1~!'
 def index():
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
 @app.route('/logout') 
 def logout():
     """cleart de sessie van de gebruiker, redirect naar index"""
