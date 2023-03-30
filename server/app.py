@@ -5,7 +5,7 @@ app = Flask(__name__)
 app.secret_key = 'ftygfuhijo123498joif1~!'
 
 @app.route('/')
-def index():
+def index(): 
     return render_template('index.html')
 
 @app.route('/logout') 
