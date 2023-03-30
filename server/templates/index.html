@@ -1,0 +1,14 @@
+<h1>home</h1>
+
+{%if session['loggedin']%}
+<p>Al ingelogt!</p>
+<a href="/logout">Uitloggen?</a>
+{%endif%}
+
+{%if not session['loggedin']%}
+<a href="/login">Inloggen?</a><br />
+{%endif%}
+
+{%if message%}
+<b>{{message}}</b>
+{%endif%}

@@ -1,0 +1,8 @@
+<form method="POST" action="">
+    <input type="text" name="username" placeholder="name" required><br />
+    <input type="password" name="password" placeholder="password"><br />
+    <input type="submit">
+    {%if error%}
+    <b>{{error}}</b>
+    {%endif%}
+</form>
