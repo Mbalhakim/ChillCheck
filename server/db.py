@@ -8,7 +8,7 @@ class Database:
     def get_connection(self):
         """Get database connection"""
         con = Database.sqlite3.connect("acs.db")
-        con.row_factory = sql.Row
+        con.row_factory = Database.sqlite3.Row
         return con
     
     def get_cursor(self, con):

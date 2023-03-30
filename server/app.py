@@ -47,7 +47,7 @@ def login():
                 session['loggedin'] = True
                 session['username'] = row['username']
                 session['id'] = row['rowid']
-                return render_template('index.html', message='Succesvol ingelogt!\n')#index + succes melding na geslaagde inlogpoging
+                return render_template('dashboard.html', message='Succesvol ingelogt!\n')#index + succes melding na geslaagde inlogpoging
             session['loggedin'] = False
             return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
         return(render_template('login.html'))#standaard render voor post
