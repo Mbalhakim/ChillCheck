@@ -1,0 +1,7 @@
+adafruit-ampy==1.1.0
+esptool==4.5.1
+Flask==2.2.3
+huas-micropython==0.0.2
+ipython==8.5.0
+python-dotenv==1.0.0
+
