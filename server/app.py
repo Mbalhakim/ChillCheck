@@ -12,18 +12,20 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+##### Login page #####
 # Render home/login page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-##### login #####
+# Logout
 @app.route('/logout') 
 def logout():
     """cleart de sessie van de gebruiker, redirect naar index"""
     session.clear()
     return redirect('/')
 
+# Login
 @app.route('/login', methods=['GET','POST'])
 def login():
     """Checkt of een gebruiker een actieve login sessie heeft. Nee? Laat login pagina zien. Ja? Laat index zien"""
@@ -50,7 +52,13 @@ def login():
             return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
         return(render_template('login.html'))#standaard render voor post
 
-##### sensor data #####
+
+##### Dashboard page #####
+# Render dashboard
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
 @app.route('/mlxData', methods=['GET'])
 def get_mlx_data():
     """Gets the data of the MLX90640 camera sensor"""
@@ -62,5 +70,6 @@ def get_sht_data():
     pass
 
 
-
-app.run(debug=True)
+##### Main #####
+if __name__ == '__main__':
+    app.run(debug=True)
