@@ -3,8 +3,8 @@ footer {
   position: absolute;
   right: 0;bottom:0;left:0;
 }
-body {
 
+body {
     background: rgb(0,134,119);
     background: -webkit-gradient(linear, left top, left bottom, from(#008677), to(#095967)) fixed;
 }
@@ -12,10 +12,8 @@ body {
 .card {
     border: none;
     border-radius: 45px;
-
-
-
 }
+
 .card-box{
      background: rgb(0,134,119);
     background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 134, 119, 0.65)), to(#095967)) fixed;
@@ -69,7 +67,5 @@ body {
     color: #a5aec0
 }
 .logo {
-
-
     filter: drop-shadow(5px 5px 5px rgba(255, 255, 255, 0.3));
 }
