@@ -1,6 +1,6 @@
 # ChillCheck
 
-ChillCheck is a repository that measures radiation temperature and cold drop in rooms to improve temperature perception. It utilizes sensors to measure these indicators and could be used in AI models in the future. The primary goal of this project is to optimize temperature perception, reduce energy wastage and avoid complaints about drafts.
+ChillCheck is a project that measures radiation temperature and cold drop in rooms to improve temperature perception. It utilizes sensors to measure these indicators and could be used in AI models in the future. The primary goal of this project is to optimize temperature perception, reduce energy wastage and avoid complaints about drafts.
 
 ## Technologies Used
 
