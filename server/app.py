@@ -59,15 +59,27 @@ def login():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route('/mlxData', methods=['GET'])
-def get_mlx_data():
-    """Gets the data of the MLX90640 camera sensor"""
-    pass
 
-@app.route('/shtData', methods=['GET'])
+##### Sensor data #####
+@app.route('/mlxData', methods=['GET', 'POST'])
+def get_mlx_data():
+    """Receive and send data of the MLX90640 camera sensor"""
+    if request.method == 'GET':
+        # Send MLX data when requested by the dashboard
+        pass
+    if request.method == 'POST':
+        # Receive data from the MLX sensor and store it in the database
+        pass
+
+@app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
-    """Gets the data of the SHT21 sensor"""
-    pass
+    """Receive and send data of the SHT21 sensor"""
+    if request.method == 'GET':
+        # Send SHT data when requested by the dashboard
+        pass
+    if request.method == 'POST':
+        # Receive data from the SHT sensor and store it in the database
+        pass
 
 
 ##### Main #####
