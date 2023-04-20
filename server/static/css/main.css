@@ -1,3 +1,113 @@
+<<<<<<< HEAD
+=======
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Roboto";
+}
+body{
+    background-color: #E6E6E6!important;
+}
+
+/***** Nav bar *****/
+.nav-bar {
+    width: 100%;
+    padding: 8px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #026d80 0%, #008072 85.94%);
+    z-index: 999;
+}
+
+.nav-logo img {
+    width: 100px;
+}
+
+.nav-list {
+    margin: auto 0;
+    padding-left: 0;
+    display: flex;
+    list-style: none;
+}
+
+.nav-item {
+    margin: 0 10px;
+}
+
+.nav-item a {
+    text-decoration: none;
+    color: white;
+    padding: 4px 8px;
+}
+
+.nav-item a:hover {
+    color: rgb(240, 240, 240);
+}
+
+/***** Room selector *****/
+.room-selector{
+    width: 20%;
+    min-width: 180px;
+    max-width: 200px;
+    padding-top: 7px;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #F2F2F2;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.rs-title{
+    color: #696969;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.rs-list {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    font-weight: 400;
+    padding-left: 0;
+    margin: 0 auto;
+}
+
+.rs-item {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.rs-item:hover {
+    background: #E4E4E4;
+}
+
+.rs-item a {
+    width: 100%;
+    padding: 3px 0;
+    text-decoration: none;
+    color: #156968;
+}
+
+.rs-item a:hover {
+    color: #156968;
+}
+
+/***** Card *****/
+.temp-box{
+    background-color: #F2F2F2;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+}
+/* Login Page */
+>>>>>>> hussain
 .login-bg{
     background-image: url(../images/login-bg.png);
     background-repeat: no-repeat;
