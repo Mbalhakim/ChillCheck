@@ -3,11 +3,7 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
-<<<<<<< HEAD
-import requests
-=======
 # import requests
->>>>>>> hussain
 
 # Used to get environment variables
 load_dotenv()
