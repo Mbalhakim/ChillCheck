@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # ChillCheck
 
 ChillCheck is a project that measures radiation temperature and cold drop in rooms to improve temperature perception. It utilizes sensors to measure these indicators and could be used in AI models in the future. The primary goal of this project is to optimize temperature perception, reduce energy wastage and avoid complaints about drafts.
@@ -48,5 +48,5 @@ ChillCheck is released under the MIT License. See LICENSE for more information.
 
 =======
 # IoT Project ACS Buildings
->>>>>>> hussain
+
 
