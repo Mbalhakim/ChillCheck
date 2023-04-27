@@ -5,6 +5,7 @@ import sqlite3 as sql
 from db import *
 # import requests
 
+
 # Used to get environment variables
 load_dotenv()
 
@@ -61,15 +62,30 @@ def dashboard():
 
 
 ##### Sensor data #####
+mlxdata = None  # create a global variable to store the data
+
+
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
-    """Receive and send data of the MLX90640 camera sensor"""
+    global mlxdata  # use the global variable
+
     if request.method == 'GET':
-        # Send MLX data when requested by the dashboard
-        pass
+        if mlxdata is not None:
+            # Show the data when requested by the dashboard
+            return jsonify({'success': True, 'data': mlxdata})
+        else:
+            # Return an error message if no data is available
+            return jsonify({'success': False, 'message': 'No data available'})
+
     if request.method == 'POST':
-        # Receive data from the MLX sensor and store it in the database
-        pass
+        # Receive data from the MLX sensor and store it in the global variable
+        data = request.data.decode('utf-8')
+        mlxdata = [float(x) for x in data.split(',')]
+        return jsonify({'success': True, 'message': 'Data received successfully'})
+
+
+        
+ 
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
@@ -84,4 +100,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='192.168.137.1', debug=True)
