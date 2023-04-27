@@ -7,7 +7,9 @@ class Database:
     
     def get_connection(self):
         """Get database connection"""
-        return Database.sqlite3.connect("acs.db")
+        con = Database.sqlite3.connect("acs.db")
+        con.row_factory = Database.sqlite3.Row
+        return con
     
     def get_cursor(self, con):
         """Get cursor from connection"""
