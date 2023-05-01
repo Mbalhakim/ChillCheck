@@ -3,7 +3,6 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
-# import requests
 
 
 # Used to get environment variables
@@ -37,16 +36,16 @@ def login():
         return redirect('/') #als er al een actieve login sessie is -> ga naar index
     else:
         if request.method == 'POST': #als er een inlog request is gedaan
-            username = request.form.get('username')
+            username = request.form.get('email')
             password = request.form.get('password')
 
-            cur.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password))
+            cur.execute('SELECT * FROM User WHERE email = ? AND password = ?', (username, password))
             #kan hier geen db class gebruiken: meerdere parameters
             row = cur.fetchone()
 
             if row: #als een account matcht aan de logingegevens
                 session['loggedin'] = True
-                session['username'] = row['username']
+                session['email'] = row['email']
                 session['id'] = row['rowid']
                 return redirect('dashboard')#index + succes melding na geslaagde inlogpoging
             session['loggedin'] = False
@@ -100,4 +99,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run(host='192.168.137.1', debug=True)
+    app.run(debug=True)
