@@ -21,7 +21,7 @@ class Database:
         con = self.get_connection()
         cur = self.get_cursor(con)
 
-        query = f"SELECT rowid, * from {table}"
+        query = f"SELECT * from {table}"
         rows = cur.execute(query).fetchall()
         cur.close()
         con.close()
@@ -52,13 +52,13 @@ class Database:
         cur.close()
         con.close()
 
-    def delete_by_id(self, table, rowid):
+    def delete_by_id(self, table, id_):
         """Delete table row by rowid"""
         con = self.get_connection()
         cur = self.get_cursor(con)
         
-        query = f"DELETE FROM {table} WHERE rowid = ?;"
-        cur.execute(query, (rowid,))
+        query = f"DELETE FROM {table} WHERE id = ?;"
+        cur.execute(query, (id_,))
         con.commit()
         cur.close()
         con.close()
