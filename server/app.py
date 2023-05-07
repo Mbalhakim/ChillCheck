@@ -3,6 +3,7 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
+from models import *
 
 
 # Used to get environment variables
@@ -46,7 +47,7 @@ def login():
             if row: #als een account matcht aan de logingegevens
                 session['loggedin'] = True
                 session['email'] = row['email']
-                session['id'] = row['rowid']
+                session['id'] = row['id']
                 return redirect('dashboard')#index + succes melding na geslaagde inlogpoging
             session['loggedin'] = False
             return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
@@ -61,17 +62,15 @@ def dashboard():
 
 
 ##### Sensor data #####
-mlxdata = None  # create a global variable to store the data
-
-
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
-    global mlxdata  # use the global variable
-
+    """Receive and send data of the MLX90640 sensor"""
     if request.method == 'GET':
-        if mlxdata is not None:
+        mlx_data = MlxData().find(column, value)
+
+        if mlx_data is not None:
             # Show the data when requested by the dashboard
-            return jsonify({'success': True, 'data': mlxdata})
+            return jsonify({'success': True, 'data': mlx_data})
         else:
             # Return an error message if no data is available
             return jsonify({'success': False, 'message': 'No data available'})
@@ -81,10 +80,6 @@ def get_mlx_data():
         data = request.data.decode('utf-8')
         mlxdata = [float(x) for x in data.split(',')]
         return jsonify({'success': True, 'message': 'Data received successfully'})
-
-
-        
- 
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
