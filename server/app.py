@@ -3,7 +3,7 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
-
+import json
 
 # Used to get environment variables
 load_dotenv()
@@ -57,7 +57,19 @@ def login():
 # Render dashboard
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    con = Database().get_connection()
+    cur = Database().get_cursor(con)
+    with open('dataExample.json') as f:
+        data = json.load(f)
+
+    minimum = min(data['data'])
+    maximum = max(data['data'])
+    avg = round(sum(data['data']) / len(data['data']), 2)
+    # Database().create('MlxData', (0, minimum, maximum, avg, 0))
+    cur.execute('INSERT INTO MlxData(min_temp, max_temp, avg_temp) values (?, ?, ?)', (minimum, maximum, avg))
+    cur.execute('COMMIT')
+    con.close()
+    return render_template('dashboard.html', minimum=minimum, maximum=maximum, avg=avg)
 
 
 ##### Sensor data #####
