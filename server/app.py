@@ -4,6 +4,7 @@ from flask import *
 import sqlite3 as sql
 from db import *
 from models import *
+import db
 
 import json
 
@@ -18,7 +19,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 # Render home/login page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('dashboard.html')
 
 # Logout
 @app.route('/logout') 
@@ -26,6 +27,24 @@ def logout():
     """cleart de sessie van de gebruiker, redirect naar index"""
     session.clear()
     return redirect('/')
+
+# Register
+@app.route('/register', methods=['GET','POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        # Add to db
+        user = User(firstname=form.firstname.data,
+                    lastname=form.lastname.data,
+                    email=form.email.data,
+                    username=form.username.data, 
+                    password=form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+        flash('Bedankt voor de registratie. Er kan nu ingelogd worden!')
+        return redirect(url_for('userr.login'))
+    return render_template('register.html', form=form)
 
 # Login
 @app.route('/login', methods=['GET','POST'])
