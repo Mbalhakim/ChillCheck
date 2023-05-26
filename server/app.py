@@ -59,40 +59,30 @@ def login():
 # Render dashboard
 @app.route('/dashboard')
 def dashboard():
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
-    with open('dataExample.json') as f:
-        data = json.load(f)
+    mlx_data = MlxData().find("id", 5)
 
-    minimum = min(data['data'])
-    maximum = max(data['data'])
-    avg = round(sum(data['data']) / len(data['data']), 2)
-    # Database().create('MlxData', (0, minimum, maximum, avg, 0))
-    cur.execute('INSERT INTO MlxData(min_temp, max_temp, avg_temp) values (?, ?, ?)', (minimum, maximum, avg))
-    cur.execute('COMMIT')
-    con.close()
-    return render_template('dashboard.html', minimum=minimum, maximum=maximum, avg=avg)
+    return render_template('dashboard.html', data={"minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
 
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
     """Receive and send data of the MLX90640 sensor"""
-    if request.method == 'GET':
-        mlx_data = MlxData().find(column, value)
-
-        if mlx_data is not None:
-            # Show the data when requested by the dashboard
-            return jsonify({'success': True, 'data': mlx_data})
-        else:
-            # Return an error message if no data is available
-            return jsonify({'success': False, 'message': 'No data available'})
-
     if request.method == 'POST':
-        # Receive data from the MLX sensor and store it in the global variable
-        data = request.data.decode('utf-8')
-        mlxdata = [float(x) for x in data.split(',')]
-        return jsonify({'success': True, 'message': 'Data received successfully'})
+        # Receive data from the MLX sensor, calculate values, and store them in the database
+        data = request.get_json()
+        
+        if data is None:
+            return jsonify({'success': False, 'message': 'Data not received'})
+        else:
+            min_temp = min(data['data'])
+            max_temp = max(data['data'])
+            avg_temp = round(sum(data['data']) / len(data['data']), 1)
+            
+            mlx_data = MlxData(0, min_temp, max_temp, avg_temp, "")
+            mlx_data.create()
+
+            return jsonify({'success': True, 'message': 'Data received'})
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
