@@ -38,15 +38,11 @@ class Database:
         con.close()
         return row
 
-    def create(self, table, data):
+    def create(self, query, data):
         """Insert a new row with data into the table"""
         con = self.get_connection()
         cur = self.get_cursor(con)
 
-        placeholders = '?,' * len(data)
-        placeholders = placeholders[:-1]
-
-        query = f"INSERT INTO {table} VALUES ({placeholders});"
         cur.execute(query, data)
         con.commit()
         cur.close()
