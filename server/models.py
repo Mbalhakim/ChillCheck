@@ -16,7 +16,9 @@ class MlxData():
         return Database().find("MlxData", column, value)
 
     def create(self):
-        Database().create("MlxData", (self.min_temp, self.max_temp, self.avg_temp))
+        query = 'INSERT INTO MlxData (min_temp, max_temp, avg_temp) values (?, ?, ?)'
+        data = (self.min_temp, self.max_temp, self.avg_temp)
+        Database().create(query, data)
     
     def delete_by_id(self, id_):
         Database().delete_by_id("MlxData", id_)
