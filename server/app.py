@@ -3,6 +3,9 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
+import cv2
+import numpy as np
+import json
 # import requests
 
 
@@ -17,7 +20,10 @@ app.secret_key = os.getenv("SECRET_KEY")
 # Render home/login page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if 'loggedin' in session:
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
 
 # Logout
 @app.route('/logout') 
@@ -58,34 +64,81 @@ def login():
 # Render dashboard
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+    else:
+        return render_template('dashboard.html')
 
 
 ##### Sensor data #####
 mlxdata = None  # create a global variable to store the data
+camerMlxdata = None  # create a global variable to store the data
 
+import csv
 
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
-    global mlxdata  # use the global variable
+    global mlxdata
+    global camerMlxdata
 
     if request.method == 'GET':
         if mlxdata is not None:
-            # Show the data when requested by the dashboard
-            return jsonify({'success': True, 'data': mlxdata})
+            return  jsonify({'success': False, 'message': 'No data available', 'data':mlxdata})
         else:
-            # Return an error message if no data is available
             return jsonify({'success': False, 'message': 'No data available'})
 
     if request.method == 'POST':
-        # Receive data from the MLX sensor and store it in the global variable
-        data = request.data.decode('utf-8')
-        mlxdata = [float(x) for x in data.split(',')]
-        return jsonify({'success': True, 'message': 'Data received successfully'})
+        try:
+            # Receive data from the MLX sensor and store it in the global variable
+            data = request.data.decode('utf-8')
+            reader = csv.reader(data.split('\n'), delimiter=',')
+            mlxdata = [list(map(float, row)) for row in reader if row]
+            camerMlxdata = [list(map(float, row)) for row in reader if row]
+            return jsonify({'success': True, 'message': 'Data received successfully','data':mlxdata})
+        except:
+            return jsonify({'success': False, 'message': 'Data not received'})
 
 
-        
- 
+@app.route('/camera')
+def visualize():
+    global camerMlxdata
+    if camerMlxdata is None:
+        return "No data available"
+
+    # Create a new numpy array to hold the temperature values and scale them to the range [0, 255]
+  
+    temp_array = np.array(cameraray, dtype=np.float32)
+    temp_array -= temp_array.min()
+    temp_array /= temp_array.max() / 255.0
+    temp_array = temp_array.astype(np.uint8)
+
+    # Create a new canvas
+    height, width = temp_array.shape
+    canvas = np.zeros((height, width, 3), dtype=np.uint8)
+
+    # Draw the temperature readings as pixels on the canvas
+    for y in range(height):
+        for x in range(width):
+            temperature = temp_array[y, x]
+            color = cv2.applyColorMap(np.array([temperature], dtype=np.float32), cv2.COLORMAP_JET)[0, 0]
+            canvas[y, x] = color
+
+    # Encode the canvas as a JPEG and return it as a Flask response
+    ret, jpeg = cv2.imencode('.jpg', canvas)
+    return Response(jpeg.tobytes(), mimetype='image/jpeg')
+
+
+
+
+# Error handler for 404 not found
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error.html', error_code=404, error_message="The requested URL was not found on the server."), 404
+
+# Error handler for 500 internal server error
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error.html', error_code=500, error_message="The server encountered an internal error and was unable to complete your request."), 500
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
@@ -100,4 +153,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run(host='192.168.137.1', debug=True)
+    app.run( debug=True)
