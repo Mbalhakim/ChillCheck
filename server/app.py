@@ -5,8 +5,12 @@ import sqlite3 as sql
 from db import *
 from models import *
 import db
+import bcrypt
 
+
+import requests
 import json
+
 
 # Used to get environment variables
 load_dotenv()
@@ -29,49 +33,42 @@ def logout():
     return redirect('/')
 
 # Register
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # Add to db
-        user = User(firstname=form.firstname.data,
-                    lastname=form.lastname.data,
-                    email=form.email.data,
-                    username=form.username.data, 
-                    password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+    if request.method == 'POST':
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        company = request.form.get('company')
+        birth_date = request.form.get('birth_date')
+        role = request.form.get('role')
 
-        flash('Bedankt voor de registratie. Er kan nu ingelogd worden!')
-        return redirect(url_for('userr.login'))
-    return render_template('register.html', form=form)
+        hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+
+        user = User(first_name=first_name, last_name=last_name, username=email, hashed_password=hashed_pw, 
+                    company=company, date_of_birth=birth_date, role=role)
+        created = user.create()
+
+        if created:
+            flash(created)
+
+    return render_template('register.html')
 
 # Login
 @app.route('/login', methods=['GET','POST'])
 def login():
-    """Checkt of een gebruiker een actieve login sessie heeft. Nee? Laat login pagina zien. Ja? Laat index zien"""
-    #maak db connectie
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
-    if 'loggedin' in session.keys() and session['loggedin']: #omslachtige dubbele check om een undefined keys foutmelding te voorkomen
-        return redirect('/') #als er al een actieve login sessie is -> ga naar index
-    else:
-        if request.method == 'POST': #als er een inlog request is gedaan
-            username = request.form.get('email')
-            password = request.form.get('password')
+    if request.method == 'POST':
+        username = request.form.get('email')
+        password = request.form.get('password')
 
-            cur.execute('SELECT * FROM User WHERE email = ? AND password = ?', (username, password))
-            #kan hier geen db class gebruiken: meerdere parameters
-            row = cur.fetchone()
-
-            if row: #als een account matcht aan de logingegevens
-                session['loggedin'] = True
-                session['email'] = row['email']
-                session['id'] = row['id']
-                return redirect('dashboard')#index + succes melding na geslaagde inlogpoging
-            session['loggedin'] = False
-            return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
-        return(render_template('login.html'))#standaard render voor post
+        user = User(username=username, hashed_password=password)
+        find = user.find()
+        
+        if user.check_password(password.encode('utf8')):
+            session['username'] = username
+            return 'ingelogd'
+    return(render_template('login.html'))
 
 
 ##### Dashboard page #####
@@ -81,6 +78,7 @@ def dashboard():
     mlx_data = MlxData().find("id", 5)
 
     return render_template('dashboard.html', data={"minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
+
 
 
 ##### Sensor data #####
