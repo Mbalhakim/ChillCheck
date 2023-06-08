@@ -127,8 +127,17 @@ def get_mlx_data():
         avg_temperature = sum(temperature_values) / len(temperature_values)
         avg_temperature = round(avg_temperature, 2)
 
-        mlx_data_obj = MlxData(min_temperature, max_temperature, avg_temperature)
-        mlx_data_obj.create()
+        con = Database().get_connection()
+        cur = Database().get_cursor(con)
+
+        # Insert the temperature statistics into the database
+        query = 'INSERT INTO MlxData (min_temp, max_temp, avg_temp) VALUES (?, ?, ?)'
+        data = (min_temperature, max_temperature, avg_temperature)
+        cur.execute(query, data)
+        con.commit()
+
+        cur.close()
+        con.close()
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
