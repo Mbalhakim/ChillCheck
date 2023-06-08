@@ -5,8 +5,8 @@ import sqlite3 as sql
 from db import *
 from models import *
 import db
+import datetime
 
-import json
 
 # Used to get environment variables
 load_dotenv()
@@ -79,14 +79,37 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     mlx_data = MlxData().find("id", 5)
+    dailyAvg = dailyAverage.find("id", 1)
 
-    return render_template('dashboard.html', data={"minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
+    return render_template('dashboard.html', data={"dailyAvg": dailyAvg['mlx_avg'], "minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
 
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
     """Receive and send data of the MLX90640 sensor"""
+    #maak connectie
+    con = Database().get_connection()
+    cur = Database().get_cursor(con)
+
+    #selecteer alle gem temps van mlx
+    cur.execute('SELECT avg_temp from MlxData;')
+    row = cur.fetchall()
+    cur.close()
+    con.close()
+    #datetime object
+    x = datetime.datetime.now()
+
+    #loop door alle temps heen
+    temperatures = [d['avg_temp'] for d in row]
+
+    #bereken avg en execute
+    average_temp = sum(temperatures) / len(temperatures)
+    query = 'INSERT INTO DailyAverage (mlx_avg, sht_avg, day) values (?, ?, ?)'
+    data = (average_temp, 0, x.strftime("%A"))
+    Database().create(query, data)
+
+
     if request.method == 'POST':
         # Receive data from the MLX sensor, calculate values, and store them in the database
         data = request.get_json()
@@ -102,7 +125,7 @@ def get_mlx_data():
             mlx_data.create()
 
             return jsonify({'success': True, 'message': 'Data received'})
-
+          
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
     """Receive and send data of the SHT21 sensor"""
