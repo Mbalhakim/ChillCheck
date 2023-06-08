@@ -18,6 +18,14 @@ body{
     background: linear-gradient(90deg, #026d80 0%, #008072 85.94%);
     z-index: 999;
 }
+.room-bar {
+    width: 100%;
+    padding: 8px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 999;
+}
 
 .nav-logo img {
     width: 100px;
@@ -100,9 +108,13 @@ body{
 }
 
 /***** Card *****/
+.row-box{
+    height: 90px;
+}
 .temp-box{
     background-color: #F2F2F2;
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
+    height: 100%;
 }
 /* Login Page */
 .login-bg{
@@ -140,5 +152,10 @@ body{
     color: #004B58!important;
     border-bottom: 1px solid #004B58;
     text-decoration: none;
+}
+@media (min-width: 1200px) {
+    .row-box{
+        height: 120px;
+    }
 }
 

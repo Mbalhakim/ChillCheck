@@ -3,11 +3,10 @@ import os
 from flask import *
 import sqlite3 as sql
 from db import *
-import cv2
-import numpy as np
-import json
-# import requests
+from models import *
+import db
 
+import json
 
 # Used to get environment variables
 load_dotenv()
@@ -15,15 +14,28 @@ load_dotenv()
 # Flask app setup
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+def csv_to_json(csv_string):
+    rows = csv_string.split("\n")
+    rows = [row.strip() for row in rows if row.strip()]
+    headers = rows[0].split(",")
+    temperature_data = []
+    for row in rows[1:]:
+        values = row.split(",")
+        temperature_row = []
+        for value in values:
+            if value == "nan":
+                temperature_row.append(None)
+            else:
+                temperature_row.append(float(value))
+        temperature_data.append(dict(zip(headers, temperature_row)))
+    json_data = json.dumps(temperature_data)
+    return json_data
 
 ##### Login page #####
 # Render home/login page
 @app.route('/')
 def index():
-    if 'loggedin' in session:
-        return redirect(url_for('dashboard'))
-    else:
-        return redirect(url_for('login'))
+    return render_template('dashboard.html')
 
 # Logout
 @app.route('/logout') 
@@ -31,6 +43,24 @@ def logout():
     """cleart de sessie van de gebruiker, redirect naar index"""
     session.clear()
     return redirect('/')
+
+# Register
+@app.route('/register', methods=['GET','POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        # Add to db
+        user = User(firstname=form.firstname.data,
+                    lastname=form.lastname.data,
+                    email=form.email.data,
+                    username=form.username.data, 
+                    password=form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+        flash('Bedankt voor de registratie. Er kan nu ingelogd worden!')
+        return redirect(url_for('userr.login'))
+    return render_template('register.html', form=form)
 
 # Login
 @app.route('/login', methods=['GET','POST'])
@@ -43,17 +73,17 @@ def login():
         return redirect('/') #als er al een actieve login sessie is -> ga naar index
     else:
         if request.method == 'POST': #als er een inlog request is gedaan
-            username = request.form.get('username')
+            username = request.form.get('email')
             password = request.form.get('password')
 
-            cur.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password))
+            cur.execute('SELECT * FROM User WHERE email = ? AND password = ?', (username, password))
             #kan hier geen db class gebruiken: meerdere parameters
             row = cur.fetchone()
 
             if row: #als een account matcht aan de logingegevens
                 session['loggedin'] = True
-                session['username'] = row['username']
-                session['id'] = row['rowid']
+                session['email'] = row['email']
+                session['id'] = row['id']
                 return redirect('dashboard')#index + succes melding na geslaagde inlogpoging
             session['loggedin'] = False
             return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
@@ -64,81 +94,59 @@ def login():
 # Render dashboard
 @app.route('/dashboard')
 def dashboard():
-    if 'loggedin' not in session:
-        return redirect(url_for('login'))
-    else:
-        return render_template('dashboard.html')
+    mlx_data = MlxData().find("id", 5)
+
+    return render_template('dashboard.html', data={"minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
 
 
 ##### Sensor data #####
-mlxdata = None  # create a global variable to store the data
-camerMlxdata = None  # create a global variable to store the data
-
-import csv
-
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
-    global mlxdata
-    global camerMlxdata
-
-    if request.method == 'GET':
-        if mlxdata is not None:
-            return  jsonify({'success': False, 'message': 'No data available', 'data':mlxdata})
-        else:
-            return jsonify({'success': False, 'message': 'No data available'})
-
     if request.method == 'POST':
-        try:
-            # Receive data from the MLX sensor and store it in the global variable
-            data = request.data.decode('utf-8')
-            reader = csv.reader(data.split('\n'), delimiter=',')
-            mlxdata = [list(map(float, row)) for row in reader if row]
-            camerMlxdata = [list(map(float, row)) for row in reader if row]
-            return jsonify({'success': True, 'message': 'Data received successfully','data':mlxdata})
-        except:
-            return jsonify({'success': False, 'message': 'Data not received'})
+        
+        content_type = request.headers.get('Content-Type')
+        print(content_type)
+        csv_string = request.data.decode('utf-8')  # Assuming the CSV string is sent as the request payload
+        csv_data = csv_string.strip().split(',')
+        json_data = json.dumps(csv_data)
+        # print(json_data)
+        temperature_values = json_data[0]  # Extract the nested list of temperatures
+
+    # Convert the temperature values to floats
+        temperature_values = [float(value) for value in temperature_values]
+        
+        
 
 
-@app.route('/camera')
-def visualize():
-    global camerMlxdata
-    if camerMlxdata is None:
-        return "No data available"
+    # Calculate minimum, maximum, and average temperatures
+        # min_temperature = min(temperature_values)
+        # max_temperature = max(temperature_values)
+        # avg_temperature = sum(temperature_values) / len(temperature_values)
+        # print(min_temperature, max_temperature, avg_temperature)
+        
+        return temperature_values
+    else:
+        return 'Invalid request method.'
 
-    # Create a new numpy array to hold the temperature values and scale them to the range [0, 255]
-  
-    temp_array = np.array(cameraray, dtype=np.float32)
-    temp_array -= temp_array.min()
-    temp_array /= temp_array.max() / 255.0
-    temp_array = temp_array.astype(np.uint8)
+    
 
-    # Create a new canvas
-    height, width = temp_array.shape
-    canvas = np.zeros((height, width, 3), dtype=np.uint8)
+    """Receive and send data of the MLX90640 sensor"""
+    
+        # Receive data from the MLX sensor, calculate values, and store them in the database
+    # data = request.get_json()
+    # return data
+        
+        # if data is None:
+        #     return jsonify({'success': False, 'message': 'Data not received'})
+        # else:
+        #     min_temp = min(data['data'])
+        #     max_temp = max(data['data'])
+        #     avg_temp = round(sum(data['data']) / len(data['data']), 1)
+            
+        #     mlx_data = MlxData(0, min_temp, max_temp, avg_temp, "")
+        #     mlx_data.create()
 
-    # Draw the temperature readings as pixels on the canvas
-    for y in range(height):
-        for x in range(width):
-            temperature = temp_array[y, x]
-            color = cv2.applyColorMap(np.array([temperature], dtype=np.float32), cv2.COLORMAP_JET)[0, 0]
-            canvas[y, x] = color
-
-    # Encode the canvas as a JPEG and return it as a Flask response
-    ret, jpeg = cv2.imencode('.jpg', canvas)
-    return Response(jpeg.tobytes(), mimetype='image/jpeg')
-
-
-
-
-# Error handler for 404 not found
-@app.errorhandler(404)
-def not_found_error(error):
-    return render_template('error.html', error_code=404, error_message="The requested URL was not found on the server."), 404
-
-# Error handler for 500 internal server error
-@app.errorhandler(500)
-def internal_error(error):
-    return render_template('error.html', error_code=500, error_message="The server encountered an internal error and was unable to complete your request."), 500
+        #     return jsonify({'success': True, 'message': 'Data received'})
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
@@ -153,4 +161,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run( debug=True)
+    app.run(host='192.168.137.1', port=5000)

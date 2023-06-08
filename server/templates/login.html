@@ -24,9 +24,9 @@
             <div class="login-form text-center mx-auto col-5">
                 <div class="text-center h3 text-white mb-3">Dashboard Login</div>
                 <form method="POST" action="">
-                    <input type="text" name="username" placeholder="name" class="form-control input rounded-0" required><br />
+                    <input type="email" name="email" placeholder="email" class="form-control input rounded-0" required><br />
                     <input type="password" name="password" class="form-control input rounded-0" placeholder="password"><br />
-                    <input type="submit" class="btn text-white submit rounded-0 w-100")>
+                    <input type="submit" class="btn text-white submit rounded-0 w-100">
                 {%if error%}
                     <b>{{error}}</b>
                 {%endif%}
