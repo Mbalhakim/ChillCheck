@@ -106,25 +106,25 @@ def get_mlx_data():
 
     """Receive and send data of the MLX90640 sensor"""
     #maak connectie
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
+    # con = Database().get_connection()
+    # cur = Database().get_cursor(con)
 
-    #selecteer alle gem temps van mlx
-    cur.execute('SELECT avg_temp from MlxData;')
-    row = cur.fetchall()
-    cur.close()
-    con.close()
-    # datetime object
-    x = datetime.datetime.now()
+    # #selecteer alle gem temps van mlx
+    # cur.execute('SELECT avg_temp from MlxData;')
+    # row = cur.fetchall()
+    # cur.close()
+    # con.close()
+    # # datetime object
+    # x = datetime.datetime.now()
 
-    #loop door alle temps heen
-    temperatures = [d['avg_temp'] for d in row]
+    # #loop door alle temps heen
+    # temperatures = [d['avg_temp'] for d in row]
 
-    #bereken avg en execute
-    average_temp = sum(temperatures) / len(temperatures)
-    query = 'INSERT INTO DailyAverage (mlx_avg, sht_avg, day) values (?, ?, ?)'
-    data = (average_temp, 0, x.strftime("%A"))
-    Database().create(query, data)
+    # #bereken avg en execute
+    # average_temp = sum(temperatures) / len(temperatures)
+    # query = 'INSERT INTO DailyAverage (mlx_avg, sht_avg, day) values (?, ?, ?)'
+    # data = (average_temp, 0, x.strftime("%A"))
+    # Database().create(query, data)
 
 
 
@@ -155,6 +155,17 @@ def get_mlx_data():
     # Convert the result to JSON format
         json_data = json.dumps(result)
 
+        con = Database().get_connection()
+        cur = Database().get_cursor(con)
+
+        # Insert the temperature statistics into the database
+        query = 'INSERT INTO MlxData (min_temp, max_temp, avg_temp) VALUES (?, ?, ?)'
+        data = (min_temperature, max_temperature, avg_temperature)
+        cur.execute(query, data)
+        con.commit()
+
+        cur.close()
+        con.close()
     # Print the JSON data
         print(json_data)
 
