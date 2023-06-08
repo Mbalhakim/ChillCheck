@@ -16,13 +16,15 @@ class RegistrationForm(FlaskForm):
 class User():
     def __init__():
         pass
-class dailyAverage():
+
+class DailyAverage():
     def __init__(self, id_ = 0, mlx_avg = 0, sht_avg = 0, date = 0, day = 0):
         self.id_ = id_
         self.mlx_avg = mlx_avg
         self.sht_avg = sht_avg
         self.date = date
         self.day = day
+    
     def find(self, column, value):
         return Database().find('DailyAverage', column, value)
     

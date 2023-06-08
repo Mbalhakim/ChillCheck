@@ -4,11 +4,13 @@ class Database:
 
     def __init__(self):
         pass
+
     def dict_factory(self, cursor, row):
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
+    
     def get_connection(self):
         """Get database connection"""
         con = Database.sqlite3.connect("acs.db")
