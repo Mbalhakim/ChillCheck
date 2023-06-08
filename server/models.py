@@ -1,5 +1,18 @@
 from db import Database
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, EqualTo, Email
+
+class RegistrationForm(FlaskForm):
+    firstname = StringField('Voornaam', validators=[DataRequired()], render_kw={"placeholder": "Voornaam"})
+    lastname = StringField('Achternaam', validators=[DataRequired()], render_kw={"placeholder": "Achternaam"})
+    username = StringField('Gebruikersnaam', validators=[DataRequired()], render_kw={"placeholder": "Gebruikersnaam"})
+    email = StringField("E-mail:", validators=[Email()], render_kw={"placeholder": "E-mail"})
+    password = PasswordField('Wachtwoord', validators=[DataRequired(), EqualTo('pass_confirm', message='Wachtwoorden dienen overeen te komen')], render_kw={"placeholder": "Wachtwoord"})
+    pass_confirm = PasswordField('Bevestig wachtwoord', validators=[DataRequired()], render_kw={"placeholder": "Bevestig wachtwoord"})
+    submit = SubmitField('Registreer')
+
 class User():
     def __init__():
         pass

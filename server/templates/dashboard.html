@@ -14,17 +14,17 @@
     <body>
         {% include 'navbar.html' %}
         <main>
-            <div class="container p-5">
+            <div class="container px-3 py-5">
                 <div class="row">
-                    <div class="col-3">
+                    <div class="col-lg-3">
                         {% include 'room-selector.html' %}
                     </div>
-                    <div class="col-9">
+                    <div class="col-lg-9">
                         <h3>Kamer 2</h3>
                         <!-- Temperatuur kaarten -->
                         <div class="row mb-4">
-                            <div class="col-8">
-                                <div class="row">
+                            <div class="col-xl-8">
+                                <div class="row row-box mb-3">
                                     <div class="col-4">
                                         <div class="temp-box p-2">
                                             <h6 class="mb-3">Luchttemperatuur</h6>
@@ -45,8 +45,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="row">
+                            <div class="col-xl-4">
+                                <div class="row row-box mb-3">
                                     <div class="col-6">
                                         <div class="temp-box p-2">
                                             <h6 class="mb-3">Min/max mockdata</h6>
@@ -63,7 +63,7 @@
                             </div>
                         </div>
                         <!-- Dagelijks gemiddeldes -->
-                        <div class="temp-box mb-4">
+                        <div class="temp-box h-auto mb-4">
                             <div class="p-4">
                                 <h6 class="mb-0">Dagelijks gemiddeldes</h6>
                             </div>
@@ -71,7 +71,7 @@
                                 <canvas id="myChart"></canvas>
                             </div>
                         </div>
-                        <div class="temp-box">
+                        <div class="temp-box h-auto">
                             <div class="p-4">
                                 <h6 class="mb-0">365&deg; heatmap</h6>
                             </div>
