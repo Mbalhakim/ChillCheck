@@ -95,16 +95,17 @@ def login():
 def dashboard():
     con = Database().get_connection()
     cur = Database().get_cursor(con)
-    query = f"SELECT * FROM MlxData WHERE created_at > {date.today()}"
-    rows = cur.execute(query).fetchall()
+    mlx_query = f"SELECT * FROM MlxData WHERE created_at > {date.today()}"
+    daily_average_query = f"SELECT * FROM DailyAverage WHERE date > {date.today()}"
+    mlx_data_rows = cur.execute(mlx_query).fetchall()
+    daily_average_rows = cur.execute(daily_average_query).fetchall()
     cur.close()
     con.close()
 
-    mlx_data = rows[len(rows) - 1]
-    # mlx_data = MlxData().find("id", 100)
-    daily_avg = DailyAverage().find("id", 1)
+    mlx_data = mlx_data_rows[len(mlx_data_rows) - 1]
+    daily_avg = daily_average_rows[len(daily_average_rows) - 1]
 
-    return render_template('dashboard.html', data={"dailyAvg": dailyAvg['mlx_avg'], "minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
+    return render_template('dashboard.html', data={"dailyAvg": daily_avg['mlx_avg'], "minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
 
 
 ##### Sensor data #####
