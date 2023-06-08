@@ -133,6 +133,8 @@ def get_mlx_data():
         content_type = request.headers.get('Content-Type')
         csv_string = request.data.decode('utf-8')  # Assuming the CSV string is sent as the request payload
         csv_data = csv_string.strip().split(',')
+        csv_data = [value for value in csv_data if value != 'nan']
+        
 
     # Convert the temperature values to integers
     # temperature_values = [int(round(float(value))) for value in csv_data]  # Option 1: Round to nearest integer
