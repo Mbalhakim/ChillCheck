@@ -16,7 +16,16 @@ class RegistrationForm(FlaskForm):
 class User():
     def __init__():
         pass
-
+class dailyAverage():
+    def __init__(self, id_ = 0, mlx_avg = 0, sht_avg = 0, date = 0, day = 0):
+        self.id_ = id_
+        self.mlx_avg = mlx_avg
+        self.sht_avg = sht_avg
+        self.date = date
+        self.day = day
+    def find(self, column, value):
+        return Database().find('DailyAverage', column, value)
+    
 class MlxData():
     def __init__(self, id_ = 0, min_temp = 0, max_temp = 0, avg_temp = 0, created_at = ""):
         self.id_ = id_
@@ -35,6 +44,7 @@ class MlxData():
     
     def delete_by_id(self, id_):
         Database().delete_by_id("MlxData", id_)
+    
 
 class ShtData():
     def __init__():

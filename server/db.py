@@ -4,7 +4,11 @@ class Database:
 
     def __init__(self):
         pass
-    
+    def dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
     def get_connection(self):
         """Get database connection"""
         con = Database.sqlite3.connect("acs.db")
@@ -14,6 +18,7 @@ class Database:
     def get_cursor(self, con):
         """Get cursor from connection"""
         cur = con.cursor()
+        cur.row_factory = self.dict_factory
         return cur
     
     def find_all(self, table):

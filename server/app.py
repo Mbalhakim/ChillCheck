@@ -5,8 +5,8 @@ import sqlite3 as sql
 from db import *
 from models import *
 import db
+import datetime
 
-import json
 
 # Used to get environment variables
 load_dotenv()
@@ -14,6 +14,22 @@ load_dotenv()
 # Flask app setup
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+def csv_to_json(csv_string):
+    rows = csv_string.split("\n")
+    rows = [row.strip() for row in rows if row.strip()]
+    headers = rows[0].split(",")
+    temperature_data = []
+    for row in rows[1:]:
+        values = row.split(",")
+        temperature_row = []
+        for value in values:
+            if value == "nan":
+                temperature_row.append(None)
+            else:
+                temperature_row.append(float(value))
+        temperature_data.append(dict(zip(headers, temperature_row)))
+    json_data = json.dumps(temperature_data)
+    return json_data
 
 ##### Login page #####
 # Render home/login page
@@ -79,29 +95,90 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     mlx_data = MlxData().find("id", 5)
+    dailyAvg = dailyAverage.find("id", 1)
 
-    return render_template('dashboard.html', data={"minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
+    return render_template('dashboard.html', data={"dailyAvg": dailyAvg['mlx_avg'], "minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
 
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['GET', 'POST'])
 def get_mlx_data():
-    """Receive and send data of the MLX90640 sensor"""
-    if request.method == 'POST':
-        # Receive data from the MLX sensor, calculate values, and store them in the database
-        data = request.get_json()
-        
-        if data is None:
-            return jsonify({'success': False, 'message': 'Data not received'})
-        else:
-            min_temp = min(data['data'])
-            max_temp = max(data['data'])
-            avg_temp = round(sum(data['data']) / len(data['data']), 1)
-            
-            mlx_data = MlxData(0, min_temp, max_temp, avg_temp, "")
-            mlx_data.create()
 
-            return jsonify({'success': True, 'message': 'Data received'})
+    """Receive and send data of the MLX90640 sensor"""
+    #maak connectie
+    # con = Database().get_connection()
+    # cur = Database().get_cursor(con)
+
+    # #selecteer alle gem temps van mlx
+    # cur.execute('SELECT avg_temp from MlxData;')
+    # row = cur.fetchall()
+    # cur.close()
+    # con.close()
+    # # datetime object
+    # x = datetime.datetime.now()
+
+    # #loop door alle temps heen
+    # temperatures = [d['avg_temp'] for d in row]
+
+    # #bereken avg en execute
+    # average_temp = sum(temperatures) / len(temperatures)
+    # query = 'INSERT INTO DailyAverage (mlx_avg, sht_avg, day) values (?, ?, ?)'
+    # data = (average_temp, 0, x.strftime("%A"))
+    # Database().create(query, data)
+
+
+
+        
+    if request.method == "POST":
+        content_type = request.headers.get('Content-Type')
+        csv_string = request.data.decode('utf-8')  # Assuming the CSV string is sent as the request payload
+        csv_data = csv_string.strip().split(',')
+        csv_data = [value for value in csv_data if value != 'nan']
+        
+
+    # Convert the temperature values to integers
+    # temperature_values = [int(round(float(value))) for value in csv_data]  # Option 1: Round to nearest integer
+        temperature_values = [float(value) for value in csv_data]
+        # Calculate minimum, maximum, and average temperatures
+        min_temperature = min(temperature_values)
+        max_temperature = max(temperature_values)
+        avg_temperature = sum(temperature_values) / len(temperature_values)
+        avg_temperature = round(avg_temperature, 2)
+
+    # Create a JSON object with the temperature statistics
+        result = {
+        'min_temperature': min_temperature,
+        'max_temperature': max_temperature,
+        'avg_temperature': avg_temperature
+        }
+
+    # Convert the result to JSON format
+        json_data = json.dumps(result)
+
+        con = Database().get_connection()
+        cur = Database().get_cursor(con)
+
+        # Insert the temperature statistics into the database
+        query = 'INSERT INTO MlxData (min_temp, max_temp, avg_temp) VALUES (?, ?, ?)'
+        data = (min_temperature, max_temperature, avg_temperature)
+        cur.execute(query, data)
+        con.commit()
+
+        cur.close()
+        con.close()
+    # Print the JSON data
+        print(json_data)
+
+        
+        return render_template('test.html', data = temperature_values)
+
+    
+    
+
+        
+    
+    
+          
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
@@ -116,4 +193,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='192.168.137.1', port=5000)
