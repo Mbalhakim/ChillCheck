@@ -95,8 +95,8 @@ def login():
 def dashboard():
     con = Database().get_connection()
     cur = Database().get_cursor(con)
-    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
-    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
+    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('now')"
+    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('now')"
     mlx_data_rows = cur.execute(mlx_query).fetchall()
     daily_average_rows = cur.execute(daily_average_query).fetchall()
     cur.close()
