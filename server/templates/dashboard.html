@@ -90,25 +90,25 @@
                 data: {
                     labels: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
                     datasets: [{
-                        label: 'Luchttemperatuur',
+                        label: 'Min temp',
                         yAxisID: 'left-y-axis',
-                        data: [18, 5, 20, 15, 9, 1, 35],
+                        data: ["{{data.min_graph.min01}}", "{{data.min_graph.min02}}", "{{data.min_graph.min03}}", "{{data.min_graph.min04}}", "{{data.min_graph.min05}}", "{{data.min_graph.min06}}", "{{data.min_graph.min07}}"],
                         fill: false,
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 0,
                         tension: 0.1
                     }, {
-                        label: 'Stralingstemperatuur',
+                        label: 'Max temp',
                         yAxisID: 'middle-y-axis',
-                        data: ["{{data.dailyAvg}}", 22, 29, 21, 24, 30, 28],
+                        data: ["{{data.max_graph.max01}}", "{{data.max_graph.max02}}", "{{data.max_graph.max03}}", "{{data.max_graph.max04}}", "{{data.max_graph.max05}}", "{{data.max_graph.max06}}", "{{data.max_graph.max07}}"],
                         fill: false,
                         borderColor: 'rgb(75, 192, 192)',
                         borderWidth: 0,
                         tension: 0.1
                     }, {
-                        label: 'Luchtvochtigheid',
+                        label: 'Avg temp',
                         yAxisID: 'right-y-axis',
-                        data: [85, 90, 80, 70, 60, 50, 55],
+                        data: ["{{data.avg_graph.avg01}}", "{{data.avg_graph.avg02}}", "{{data.avg_graph.avg03}}", "{{data.avg_graph.avg04}}", "{{data.avg_graph.avg05}}", "{{data.avg_graph.avg06}}", "{{data.avg_graph.avg07}}"],
                         fill: false,
                         borderColor: 'rgb(54, 162, 235)',
                         borderWidth: 0,

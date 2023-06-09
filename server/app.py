@@ -95,17 +95,26 @@ def login():
 def dashboard():
     con = Database().get_connection()
     cur = Database().get_cursor(con)
-    mlx_query = f"SELECT * FROM MlxData WHERE created_at > {date.today()}"
-    daily_average_query = f"SELECT * FROM DailyAverage WHERE date > {date.today()}"
+    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
+    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
     mlx_data_rows = cur.execute(mlx_query).fetchall()
     daily_average_rows = cur.execute(daily_average_query).fetchall()
     cur.close()
     con.close()
-
-    mlx_data = mlx_data_rows[len(mlx_data_rows) - 1]
-    daily_avg = daily_average_rows[len(daily_average_rows) - 1]
-
-    return render_template('dashboard.html', data={"dailyAvg": daily_avg['mlx_avg'], "minTemp": mlx_data['min_temp'], "maxTemp": mlx_data['max_temp'], "avgTemp": mlx_data['avg_temp']})
+    
+    mlx_week_data = mlx_data_rows[len(mlx_data_rows) - 7:] # get mlx data of this week
+    mlx_week_min = [x['min_temp'] for x in mlx_week_data]
+    mlx_week_max = [x['max_temp'] for x in mlx_week_data]
+    mlx_week_avg = [x['avg_temp'] for x in mlx_week_data]
+    
+    min_obj = {"min01": mlx_week_min[0], "min02": mlx_week_min[1], "min03": mlx_week_min[2], "min04": mlx_week_min[3], "min05": mlx_week_min[4], "min06": mlx_week_min[5], "min07": mlx_week_min[6]}
+    max_obj = {"max01": mlx_week_max[0], "max02": mlx_week_max[1], "max03": mlx_week_max[2], "max04": mlx_week_max[3], "max05": mlx_week_max[4], "max06": mlx_week_max[5], "max07": mlx_week_max[6]}
+    avg_obj = {"avg01": mlx_week_avg[0], "avg02": mlx_week_avg[1], "avg03": mlx_week_avg[2], "avg04": mlx_week_avg[3], "avg05": mlx_week_avg[4], "avg06": mlx_week_avg[5], "avg07": mlx_week_avg[6]}
+    
+    mlx_latest_data = mlx_data_rows[len(mlx_data_rows) - 1]
+    daily_latest_avg = daily_average_rows[len(daily_average_rows) - 1]
+    
+    return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
 
 
 ##### Sensor data #####
