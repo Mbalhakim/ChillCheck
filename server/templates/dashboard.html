@@ -73,7 +73,7 @@
                         </div>
                         <div class="temp-box h-auto">
                             <div class="p-4">
-                                <h6 class="mb-0">365&deg; heatmap</h6>
+                                <h6 class="mb-0">360&deg; heatmap</h6>
                             </div>
                         </div>
                     </div>
@@ -91,26 +91,23 @@
                     labels: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
                     datasets: [{
                         label: 'Min temp',
-                        yAxisID: 'left-y-axis',
                         data: ["{{data.min_graph.min01}}", "{{data.min_graph.min02}}", "{{data.min_graph.min03}}", "{{data.min_graph.min04}}", "{{data.min_graph.min05}}", "{{data.min_graph.min06}}", "{{data.min_graph.min07}}"],
+                        fill: false,
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 0,
+                        tension: 0.1
+                    }, {
+                        label: 'Max temp',
+                        data: ["{{data.max_graph.max01}}", "{{data.max_graph.max02}}", "{{data.max_graph.max03}}", "{{data.max_graph.max04}}", "{{data.max_graph.max05}}", "{{data.max_graph.max06}}", "{{data.max_graph.max07}}"],
                         fill: false,
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 0,
                         tension: 0.1
                     }, {
-                        label: 'Max temp',
-                        yAxisID: 'middle-y-axis',
-                        data: ["{{data.max_graph.max01}}", "{{data.max_graph.max02}}", "{{data.max_graph.max03}}", "{{data.max_graph.max04}}", "{{data.max_graph.max05}}", "{{data.max_graph.max06}}", "{{data.max_graph.max07}}"],
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        borderWidth: 0,
-                        tension: 0.1
-                    }, {
                         label: 'Avg temp',
-                        yAxisID: 'right-y-axis',
                         data: ["{{data.avg_graph.avg01}}", "{{data.avg_graph.avg02}}", "{{data.avg_graph.avg03}}", "{{data.avg_graph.avg04}}", "{{data.avg_graph.avg05}}", "{{data.avg_graph.avg06}}", "{{data.avg_graph.avg07}}"],
                         fill: false,
-                        borderColor: 'rgb(54, 162, 235)',
+                        borderColor: 'rgb(75, 192, 192)',
                         borderWidth: 0,
                         tension: 0.1
                     }]
@@ -123,54 +120,25 @@
                                 drawBorder: false
                             },
                             gridLines: {
-                                drawOnChartArea: false,
-                                display: false,
-                                color: 'rgba(0, 0, 0, 0)',
-                                drawBorder: false
+                                display: true,
+                                drawBorder: true
+                            },
+                            scaleLabel: {
+                                display: true
                             }
                         }],
                         yAxes: [{
-                            id: 'left-y-axis',
-                            position: 'left',
-                            gridLines: {
-                                display: false,
-                                color: 'rgba(0, 0, 0, 0)',
-                                drawBorder: false
-                            },
                             ticks: {
                                 beginAtZero: true,
-                                drawBorder: false,
-                                maxTicksLimit: 2,
-                                stepSize: 20
-                            }
-                        }, {
-                            id: 'middle-y-axis',
-                            position: 'left',
-                            gridLines: {
-                                display: false,
-                                color: 'rgba(0, 0, 0, 0)',
-                                drawBorder: false
+                                suggestedMax: 100,
+                                stepSize: 10
                             },
-                            ticks: {
-                                display: false
-                            }
-                        }, {
-                            id: 'right-y-axis',
-                            position: 'right',
-                            scaleLabel: {
+                            gridLines: {
                                 display: true,
-                                position: 'right'
+                                drawBorder: true
                             },
-                            gridLines: {
-                                display: false,
-                                color: 'rgba(0, 0, 0, 0)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                beginAtZero: true,
-                                drawBorder: false,
-                                maxTicksLimit: 2,
-                                stepSize: 25
+                            scaleLabel: {
+                                display: true
                             }
                         }]
                     }
