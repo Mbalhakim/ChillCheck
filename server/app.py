@@ -116,6 +116,12 @@ def dashboard():
     
     return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
 
+# Render Feedback pagina
+@app.route('/feedback')
+def feedback():
+    con = Database().get_connection()
+    cur = Database().get_cursor(con)
+    return render_template('feedback.html')
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['POST'])
