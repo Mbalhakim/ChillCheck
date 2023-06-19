@@ -23,16 +23,15 @@
                     </div>
                 </div>
             </div>
-            <div class="fb-box">
+            <form class="fb-box" method="POST" action="/feedback">
                 <div class="p-4">
                 <h5 class="fb-text">Hoe ervaart u de kamer?</h6>
                 <br>
-                <p class="fb-text"><span id="fbslider"></span></p>
-                <input type="range" min="-50" max="50" value="0" class="slider" id="myRange">
+                <p class="fb-text"><span id="fbslider">Goed</span></p>
+                <input type="range" min="-50" max="50" value="0" class="slider" id="myRange" name="feedback-slider">
                 <script>
                     var slider = document.getElementById("myRange");
                     var output = document.getElementById("fbslider");
-                    output.innerHTML = getSliderValueText(slider.value);
                     
                     slider.oninput = function() {
                       output.innerHTML = getSliderValueText(slider.value);
@@ -41,34 +40,32 @@
                     function getSliderValueText(value) {
                         var valueText = "";
                         if (value < -48){
-                            valueText = "Heel koud!";
+                            valueText = "Heel koud";
                         } else if (value < -30){
-                            valueText= "Koud!";
+                            valueText= "Koud";
                         } else if (value < -15){
-                            valueText= "Beetje koud.";
+                            valueText= "Beetje koud";
                         } else if (value < 15 ){
-                            valueText= "Goed.";
+                            valueText= "Goed";
                         } else if (value < 30){
-                            valueText= "Beetje warm.";
+                            valueText= "Beetje warm";
                         } else if (value < 48){
-                            valueText= "Warm!";
+                            valueText= "Warm";
                         } else {
-                            valueText = "Heel warm!";
+                            valueText = "Heel warm";
                         }
                         return valueText;
                     }
-
-
+                    
                 </script>
                 <br><br>
-                
 
                 <h5 class="fb-text">Andere feedback?</h6><br>
-                <textarea class="fb-textbox" placeholder="Enter here your feedback."></textarea>
+                <textarea class="fb-textbox" placeholder="Vul uw feedback hier in" name="feedback-text"></textarea>
                 <br>
-                <button class="fb-subknop">Submit</button>
+                <button class="fb-subknop">Verzend</button>
                 </div>
-            </div>
+            </form>
         </main>
     </body>
 </html>
