@@ -58,7 +58,7 @@ def register():
         db.session.commit()
 
         flash('Bedankt voor de registratie. Er kan nu ingelogd worden!')
-        return redirect(url_for('userr.login'))
+        return redirect(url_for('user.login'))
     return render_template('register.html', form=form)
 
 # Login
@@ -95,8 +95,8 @@ def login():
 def dashboard():
     con = Database().get_connection()
     cur = Database().get_cursor(con)
-    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('now')"
-    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('now')"
+    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
+    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
     mlx_data_rows = cur.execute(mlx_query).fetchall()
     daily_average_rows = cur.execute(daily_average_query).fetchall()
     cur.close()
@@ -117,11 +117,34 @@ def dashboard():
     return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
 
 # Render Feedback pagina
-@app.route('/feedback')
+@app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
-    return render_template('feedback.html')
+    if request.method == 'POST':
+        feedback_slider_value = int(request.form.get('feedback-slider'))
+        feedback_text = request.form.get('feedback-text')
+        
+        if feedback_slider_value < -48 and feedback_slider_value > -51:
+            fb = Feedback(room=1, feedback_slider=1, feedback_text=feedback_text).create()
+        elif feedback_slider_value < -30:
+            fb = Feedback(room=1, feedback_slider=2, feedback_text=feedback_text).create()
+        elif feedback_slider_value < -15:
+            fb = Feedback(room=1, feedback_slider=3, feedback_text=feedback_text).create()
+        elif feedback_slider_value < 15:
+            fb = Feedback(room=1, feedback_slider=4, feedback_text=feedback_text).create()
+        elif feedback_slider_value < 30:
+            fb = Feedback(room=1, feedback_slider=5, feedback_text=feedback_text).create()
+        elif feedback_slider_value < 48:
+            fb = Feedback(room=1, feedback_slider=6, feedback_text=feedback_text).create()
+        elif feedback_slider_value < 51:
+            fb = Feedback(room=1, feedback_slider=7, feedback_text=feedback_text).create()
+        
+        if fb:
+            flash("Feedback is verzonden")
+            return redirect("/dashboard")
+        
+        return render_template("feedback.html")
+    else:
+        return render_template("feedback.html")
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['POST'])
