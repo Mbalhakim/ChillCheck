@@ -47,7 +47,23 @@ class MlxData():
     def delete_by_id(self, id_):
         Database().delete_by_id("MlxData", id_)
     
-
 class ShtData():
     def __init__():
         pass
+
+class Feedback():
+    def __init__(self, id_ = 0, room = 0, feedback_slider = 0, feedback_text = "", created_at = ""):
+        self.id_ = id_
+        self.room = room
+        self.feedback_slider = feedback_slider
+        self.feedback_text = feedback_text
+        self.created_at = created_at
+
+    def find(self, column, value):
+        return Database().find("Feedback", column, value)
+
+    def create(self):
+        query = 'INSERT INTO Feedback (room, feedback_slider, feedback_text) values (?, ?, ?)'
+        data = (self.room, self.feedback_slider, self.feedback_text)
+        Database().create(query, data)
+        return self
