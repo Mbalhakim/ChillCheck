@@ -16,54 +16,50 @@
     <body>
         {% include 'navbar.html' %}
         <main>
-            <div class="container px-3 py-5">
-                <div class="row">
-                    <div class="col-lg-3">
-                        {% include 'room-selector.html' %}
-                    </div>
-                </div>
-            </div>
             <form class="fb-box" method="POST" action="/feedback">
                 <div class="p-4">
-                <h5 class="fb-text">Hoe ervaart u de kamer?</h6>
-                <br>
-                <p class="fb-text"><span id="fbslider">Goed</span></p>
-                <input type="range" min="-50" max="50" value="0" class="slider" id="myRange" name="feedback-slider">
-                <script>
-                    var slider = document.getElementById("myRange");
-                    var output = document.getElementById("fbslider");
-                    
-                    slider.oninput = function() {
-                      output.innerHTML = getSliderValueText(slider.value);
-                    };
+                    <h5 class="fb-text">Hoe ervaart u de kamer?</h5>
+                    <select name="feedback-room" id="feedback-room">
+                        <option value="1">Kamer 1</option>
+                        <option value="2">Kamer 2</option>
+                    </select>
+                    <p class="fb-text"><span id="fbslider">Goed</span></p>
+                    <input type="range" min="-50" max="50" value="0" class="slider" id="myRange" name="feedback-slider">
+                    <script>
+                        var slider = document.getElementById("myRange");
+                        var output = document.getElementById("fbslider");
+                        
+                        slider.oninput = function() {
+                        output.innerHTML = getSliderValueText(slider.value);
+                        };
 
-                    function getSliderValueText(value) {
-                        var valueText = "";
-                        if (value < -48){
-                            valueText = "Heel koud";
-                        } else if (value < -30){
-                            valueText= "Koud";
-                        } else if (value < -15){
-                            valueText= "Beetje koud";
-                        } else if (value < 15 ){
-                            valueText= "Goed";
-                        } else if (value < 30){
-                            valueText= "Beetje warm";
-                        } else if (value < 48){
-                            valueText= "Warm";
-                        } else {
-                            valueText = "Heel warm";
+                        function getSliderValueText(value) {
+                            var valueText = "";
+                            if (value < -48){
+                                valueText = "Heel koud";
+                            } else if (value < -30){
+                                valueText= "Koud";
+                            } else if (value < -15){
+                                valueText= "Beetje koud";
+                            } else if (value < 15 ){
+                                valueText= "Goed";
+                            } else if (value < 30){
+                                valueText= "Beetje warm";
+                            } else if (value < 48){
+                                valueText= "Warm";
+                            } else {
+                                valueText = "Heel warm";
+                            }
+                            return valueText;
                         }
-                        return valueText;
-                    }
-                    
-                </script>
-                <br><br>
+                        
+                    </script>
+                    <br><br>
 
-                <h5 class="fb-text">Andere feedback?</h6><br>
-                <textarea class="fb-textbox" placeholder="Vul uw feedback hier in" name="feedback-text"></textarea>
-                <br>
-                <button class="fb-subknop">Verzend</button>
+                    <h5 class="fb-text">Andere feedback?</h6><br>
+                    <textarea class="fb-textbox" placeholder="Vul uw feedback hier in" name="feedback-text"></textarea>
+                    <br>
+                    <button class="fb-subknop">Verzend</button>
                 </div>
             </form>
         </main>
