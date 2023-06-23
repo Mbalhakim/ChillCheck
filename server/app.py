@@ -91,39 +91,42 @@ def login():
 
 ##### Dashboard page #####
 # Render dashboard
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
     # fetch mlx data from database
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
-    mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
-    daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
-    mlx_data_rows = cur.execute(mlx_query).fetchall()
-    daily_average_rows = cur.execute(daily_average_query).fetchall()
-    cur.close()
-    con.close()
-    
-    # get the most recent mlx data row and daily average row
-    mlx_latest_data = mlx_data_rows[len(mlx_data_rows) - 1]
-    daily_latest_avg = daily_average_rows[len(daily_average_rows) - 1]
+    if request.method == 'GET' and 'loggedin' in session.keys() and session['loggedin']:
+        con = Database().get_connection()
+        cur = Database().get_cursor(con)
+        mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
+        daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
+        mlx_data_rows = cur.execute(mlx_query).fetchall()
+        daily_average_rows = cur.execute(daily_average_query).fetchall()
+        cur.close()
+        con.close()
+        
+        # get the most recent mlx data row and daily average row
+        mlx_latest_data = mlx_data_rows[len(mlx_data_rows) - 1]
+        daily_latest_avg = daily_average_rows[len(daily_average_rows) - 1]
 
-    # get min, max, and avg temp of the most recent 7 mlx data rows
-    mlx_week_data = mlx_data_rows[len(mlx_data_rows) - 7:]
-    mlx_week_min = [x['min_temp'] for x in mlx_week_data]
-    mlx_week_max = [x['max_temp'] for x in mlx_week_data]
-    mlx_week_avg = [x['avg_temp'] for x in mlx_week_data]
-    
-    # create json objects for min, max, and avg temp of mlx data to pass to the dashboard
-    min_obj = {"min01": mlx_week_min[0], "min02": mlx_week_min[1], "min03": mlx_week_min[2], "min04": mlx_week_min[3], "min05": mlx_week_min[4], "min06": mlx_week_min[5], "min07": mlx_week_min[6]}
-    max_obj = {"max01": mlx_week_max[0], "max02": mlx_week_max[1], "max03": mlx_week_max[2], "max04": mlx_week_max[3], "max05": mlx_week_max[4], "max06": mlx_week_max[5], "max07": mlx_week_max[6]}
-    avg_obj = {"avg01": mlx_week_avg[0], "avg02": mlx_week_avg[1], "avg03": mlx_week_avg[2], "avg04": mlx_week_avg[3], "avg05": mlx_week_avg[4], "avg06": mlx_week_avg[5], "avg07": mlx_week_avg[6]}
-    
-    return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
+        # get min, max, and avg temp of the most recent 7 mlx data rows
+        mlx_week_data = mlx_data_rows[len(mlx_data_rows) - 7:]
+        mlx_week_min = [x['min_temp'] for x in mlx_week_data]
+        mlx_week_max = [x['max_temp'] for x in mlx_week_data]
+        mlx_week_avg = [x['avg_temp'] for x in mlx_week_data]
+        
+        # create json objects for min, max, and avg temp of mlx data to pass to the dashboard
+        min_obj = {"min01": mlx_week_min[0], "min02": mlx_week_min[1], "min03": mlx_week_min[2], "min04": mlx_week_min[3], "min05": mlx_week_min[4], "min06": mlx_week_min[5], "min07": mlx_week_min[6]}
+        max_obj = {"max01": mlx_week_max[0], "max02": mlx_week_max[1], "max03": mlx_week_max[2], "max04": mlx_week_max[3], "max05": mlx_week_max[4], "max06": mlx_week_max[5], "max07": mlx_week_max[6]}
+        avg_obj = {"avg01": mlx_week_avg[0], "avg02": mlx_week_avg[1], "avg03": mlx_week_avg[2], "avg04": mlx_week_avg[3], "avg05": mlx_week_avg[4], "avg06": mlx_week_avg[5], "avg07": mlx_week_avg[6]}
+        
+        return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
+    else:
+        return redirect("/login")
 
 # Render Feedback pagina
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
-    if request.method == 'POST':
+    if request.method == 'POST' and 'loggedin' in session.keys() and session['loggedin']:
         feedback_slider_value = int(request.form.get('feedback-slider'))
         feedback_text = request.form.get('feedback-text')
         
@@ -147,8 +150,10 @@ def feedback():
             return redirect("/dashboard")
         
         return render_template("feedback.html")
-    else:
+    elif request.method == 'GET' and 'loggedin' in session.keys() and session['loggedin']:
         return render_template("feedback.html")
+    else:
+        return redirect("/login")
 
 ##### Sensor data #####
 @app.route('/mlxData', methods=['POST'])
