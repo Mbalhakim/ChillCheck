@@ -4,10 +4,10 @@
     </a>
     <ul class="nav-list">
         {%if session['loggedin']%}
+        <li class="nav-item"><a href="/feedback">Feedback</a></li>
         <li class="nav-item"><a href="/logout">Uitloggen</a></li>
         {%endif%}
         <li class="nav-item"><a href="#">Mijn Account</a></li>
-
     </ul>
 </nav>
 <nav class="room-bar bg-light d-lg-none">
