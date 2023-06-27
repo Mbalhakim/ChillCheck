@@ -129,21 +129,22 @@ def feedback():
     if request.method == 'POST' and 'loggedin' in session.keys() and session['loggedin']:
         feedback_slider_value = int(request.form.get('feedback-slider'))
         feedback_text = request.form.get('feedback-text')
+        feedback_room = request.form.get('feedback-room')
         
         if feedback_slider_value < -48 and feedback_slider_value > -51:
-            fb = Feedback(room=1, feedback_slider=1, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=1, feedback_text=feedback_text).create()
         elif feedback_slider_value < -30:
-            fb = Feedback(room=1, feedback_slider=2, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=2, feedback_text=feedback_text).create()
         elif feedback_slider_value < -15:
-            fb = Feedback(room=1, feedback_slider=3, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=3, feedback_text=feedback_text).create()
         elif feedback_slider_value < 15:
-            fb = Feedback(room=1, feedback_slider=4, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=4, feedback_text=feedback_text).create()
         elif feedback_slider_value < 30:
-            fb = Feedback(room=1, feedback_slider=5, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=5, feedback_text=feedback_text).create()
         elif feedback_slider_value < 48:
-            fb = Feedback(room=1, feedback_slider=6, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=6, feedback_text=feedback_text).create()
         elif feedback_slider_value < 51:
-            fb = Feedback(room=1, feedback_slider=7, feedback_text=feedback_text).create()
+            fb = Feedback(room=feedback_room, feedback_slider=7, feedback_text=feedback_text).create()
         
         if fb:
             flash("Feedback is verzonden")
