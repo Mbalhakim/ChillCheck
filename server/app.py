@@ -83,7 +83,7 @@ def login():
                 session['loggedin'] = True
                 session['email'] = row['email']
                 session['id'] = row['id']
-                return redirect('dashboard')#index + succes melding na geslaagde inlogpoging
+                return redirect('/dashboard')#index + succes melding na geslaagde inlogpoging
             session['loggedin'] = False
             return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
         return(render_template('login.html'))#standaard render voor post
