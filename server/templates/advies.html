@@ -1,9 +1,9 @@
-<div class="container">
-    <div class="card bg-dark">
+<div class="advies-bg">
+    <div class="card bg-light">
   <div class="card-header text-light fw-bold advies">
     Systeem advies
   </div>
-  <div class="card-body text-light">
+  <div class="card-body text-dark">
     <h5 class="card-title">Bespaar energie</h5>
     {% if advies == 0 %}
     <p class="card-text text-warning">De temperatuur is onder 16.5 graden gedaalt. Stel het bij.</p>
@@ -14,9 +14,6 @@
     {% if advies == 2 %}
     <p class="card-text text-success">De huidige temperatuur is goed bijgesteld. U bespaart energie.</p>
     {% endif %}
-
-
-    
   </div>
 </div>
 
