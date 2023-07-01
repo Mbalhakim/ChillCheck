@@ -1,11 +1,22 @@
 <div class="container">
     <div class="card bg-dark">
-  <div class="card-header bg-success text-light fw-bold">
+  <div class="card-header text-light fw-bold advies">
     Systeem advies
   </div>
   <div class="card-body text-light">
     <h5 class="card-title">Bespaar energie</h5>
-    <p class="card-text"> De temperatuur daalt tot onder de 23°C, wordt aanbevolen dat de gebruiker overweegt om de thermostaat een paar graden bij te stellen om het energieverbruik te verminderen.</p>
+    {% if advies == 0 %}
+    <p class="card-text text-warning">De temperatuur is onder 16.5 graden gedaalt. Stel het bij.</p>
+    {% endif %}
+    {% if advies == 1 %}
+    <p class="card-text text-warning">De temperatuur is 19 graden celcius of hoger. Verlaag de temperatuur om het energieverbruik te verminderen.</p>
+    {% endif %}
+    {% if advies == 2 %}
+    <p class="card-text text-success">De huidige temperatuur is goed bijgesteld. U bespaart energie.</p>
+    {% endif %}
+
+
+    
   </div>
 </div>
 

@@ -18,6 +18,9 @@ body{
     background: linear-gradient(90deg, #026d80 0%, #008072 85.94%);
     z-index: 999;
 }
+.advies {
+    background: linear-gradient(90deg, #026d80 0%, #008072 85.94%);
+}
 .room-bar {
     width: 100%;
     padding: 8px 5%;

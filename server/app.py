@@ -119,7 +119,23 @@ def dashboard():
         max_obj = {"max01": mlx_week_max[0], "max02": mlx_week_max[1], "max03": mlx_week_max[2], "max04": mlx_week_max[3], "max05": mlx_week_max[4], "max06": mlx_week_max[5], "max07": mlx_week_max[6]}
         avg_obj = {"avg01": mlx_week_avg[0], "avg02": mlx_week_avg[1], "avg03": mlx_week_avg[2], "avg04": mlx_week_avg[3], "avg05": mlx_week_avg[4], "avg06": mlx_week_avg[5], "avg07": mlx_week_avg[6]}
         
-        return render_template('dashboard.html', data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
+
+        #advies
+        avg_temp = mlx_latest_data['avg_temp']
+        koud = 16.5
+        warm = 19
+        if avg_temp <= koud:
+            #zet temp hoger
+            advies = 0
+        elif avg_temp >= warm:
+            #zet temp lager (bespaar energie)
+            advies = 1
+        elif avg_temp > koud and avg_temp < warm:
+            #ok
+            advies = 2
+
+
+        return render_template('dashboard.html', advies=advies, data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
     else:
         return redirect("/login")
 
