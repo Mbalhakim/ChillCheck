@@ -71,17 +71,11 @@
                                 <canvas id="myChart"></canvas>
                             </div>
                         </div>
-                        <div class="temp-box h-auto">
-                            <div class="p-4">
-                                <h6 class="mb-0">360&deg; heatmap</h6>
-                            </div>
-                        </div>
+                        {% include 'advies.html'%}
                     </div>
                 </div>
             </div>
         </main>
-  
-        {% include 'advies.html'%}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.min.js"></script>
         <script>
             var ctx = document.getElementById('myChart').getContext('2d');
