@@ -97,17 +97,17 @@ def dashboard():
     if request.method == 'GET' and 'loggedin' in session.keys() and session['loggedin']:
         con = Database().get_connection()
         cur = Database().get_cursor(con)
+
         mlx_query = f"SELECT * FROM MlxData WHERE date(created_at) >= date('2023-06-08')"
         daily_average_query = f"SELECT * FROM DailyAverage WHERE date(date) >= date('2023-06-08')"
         mlx_data_rows = cur.execute(mlx_query).fetchall()
         daily_average_rows = cur.execute(daily_average_query).fetchall()
-        cur.close()
-        con.close()
         
         # get the most recent mlx data row and daily average row
         mlx_latest_data = mlx_data_rows[len(mlx_data_rows) - 1]
         daily_latest_avg = daily_average_rows[len(daily_average_rows) - 1]
 
+        # TODO: use DailyAverage table for mlx graph
         # get min, max, and avg temp of the most recent 7 mlx data rows
         mlx_week_data = mlx_data_rows[len(mlx_data_rows) - 7:]
         mlx_week_min = [x['min_temp'] for x in mlx_week_data]
@@ -115,10 +115,72 @@ def dashboard():
         mlx_week_avg = [x['avg_temp'] for x in mlx_week_data]
         
         # create json objects for min, max, and avg temp of mlx data to pass to the dashboard
-        min_obj = {"min01": mlx_week_min[0], "min02": mlx_week_min[1], "min03": mlx_week_min[2], "min04": mlx_week_min[3], "min05": mlx_week_min[4], "min06": mlx_week_min[5], "min07": mlx_week_min[6]}
-        max_obj = {"max01": mlx_week_max[0], "max02": mlx_week_max[1], "max03": mlx_week_max[2], "max04": mlx_week_max[3], "max05": mlx_week_max[4], "max06": mlx_week_max[5], "max07": mlx_week_max[6]}
-        avg_obj = {"avg01": mlx_week_avg[0], "avg02": mlx_week_avg[1], "avg03": mlx_week_avg[2], "avg04": mlx_week_avg[3], "avg05": mlx_week_avg[4], "avg06": mlx_week_avg[5], "avg07": mlx_week_avg[6]}
+        min_obj = {}
+        max_obj = {}
+        avg_obj = {}
+        if len(mlx_data_rows) > 6:
+            min_obj = {
+                "min01": mlx_week_min[0],
+                "min02": mlx_week_min[1],
+                "min03": mlx_week_min[2],
+                "min04": mlx_week_min[3],
+                "min05": mlx_week_min[4],
+                "min06": mlx_week_min[5],
+                "min07": mlx_week_min[6]
+            }
+
+            max_obj = {
+                "max01": mlx_week_max[0],
+                "max02": mlx_week_max[1],
+                "max03": mlx_week_max[2],
+                "max04": mlx_week_max[3],
+                "max05": mlx_week_max[4],
+                "max06": mlx_week_max[5],
+                "max07": mlx_week_max[6]
+            }
+
+            avg_obj = {
+                "avg01": mlx_week_avg[0],
+                "avg02": mlx_week_avg[1],
+                "avg03": mlx_week_avg[2],
+                "avg04": mlx_week_avg[3],
+                "avg05": mlx_week_avg[4],
+                "avg06": mlx_week_avg[5],
+                "avg07": mlx_week_avg[6]
+            }
         
+        # Get the latest air quality
+        sht_query = f"SELECT * FROM ShtData WHERE date(created_at) >= date('2023-06-08')"
+        sht_data_rows = cur.execute(sht_query).fetchall()
+        sht_week_data = sht_data_rows[len(sht_data_rows) - 7:]
+        sht_week_eco2 = [x['eco2'] for x in sht_week_data]
+        sht_week_tvoc = [x['tvoc'] for x in sht_week_data]
+        sht_latest_data = sht_data_rows[len(sht_data_rows) - 1]
+
+        # TODO: use DailyAverage table for sht graph
+        # Create json objects for eco2, and tvoc of sht data to pass to the dashboard
+        eco2_obj = {}
+        tvoc_obj = {}
+        if len(sht_data_rows) > 6:
+            eco2_obj = {
+                "eco2_01": sht_week_eco2[0],
+                "eco2_02": sht_week_eco2[1],
+                "eco2_03": sht_week_eco2[2],
+                "eco2_04": sht_week_eco2[3],
+                "eco2_05": sht_week_eco2[4],
+                "eco2_06": sht_week_eco2[5],
+                "eco2_07": sht_week_eco2[6]
+            }
+
+            tvoc_obj = {
+                "tvoc_01": sht_week_tvoc[0],
+                "tvoc_02": sht_week_tvoc[1],
+                "tvoc_03": sht_week_tvoc[2],
+                "tvoc_04": sht_week_tvoc[3],
+                "tvoc_05": sht_week_tvoc[4],
+                "tvoc_06": sht_week_tvoc[5],
+                "tvoc_07": sht_week_tvoc[6],
+            }
 
         #advies
         avg_temp = mlx_latest_data['avg_temp']
@@ -134,8 +196,15 @@ def dashboard():
             #ok
             advies = 2
 
+        # Close database con and cur
+        cur.close()
+        con.close()
 
-        return render_template('dashboard.html', advies=advies, data={"min_graph": min_obj, "max_graph": max_obj, "avg_graph": avg_obj, "dailyAvg": daily_latest_avg['mlx_avg'], "minTemp": mlx_latest_data['min_temp'], "maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp']})
+        mlx_graph_data = {"min": min_obj, "max": max_obj, "avg": avg_obj}
+        sht_graph_data = {"eco2": eco2_obj, "tvoc": tvoc_obj}
+        cards_data = {"minTemp": mlx_latest_data['min_temp'],"maxTemp": mlx_latest_data['max_temp'], "avgTemp": mlx_latest_data['avg_temp'], "airQuality": sht_latest_data["air_quality"], "eco2": sht_latest_data["eco2"], "tvoc": sht_latest_data["tvoc"]}
+
+        return render_template('dashboard.html', advies=advies, data={"mlxGraph": mlx_graph_data, "shtGraph": sht_graph_data, "cards": cards_data})
     else:
         return redirect("/login")
 
@@ -191,40 +260,33 @@ def get_mlx_data():
         avg_temperature = sum(temperature_values) / len(temperature_values)
         avg_temperature = round(avg_temperature, 2)
 
-        con = Database().get_connection()
-        cur = Database().get_cursor(con)
+        # Add new MlxData table row
+        mlx_data = MlxData(min_temp=min_temperature, max_temp=max_temperature, avg_temp=avg_temperature).create()
+        
+        return "Data received successfully"
 
-        # Insert the temperature statistics into the database
-        query = 'INSERT INTO MlxData (min_temp, max_temp, avg_temp) VALUES (?, ?, ?)'
-        data = (min_temperature, max_temperature, avg_temperature)
-        cur.execute(query, data)
-        con.commit()
-
-        cur.close()
-        con.close()
-        print(f"data= min: {min_temperature}, max: {max_temperature}, avg: {avg_temperature} ")
-    return f"data= min: {min_temperature}, max: {max_temperature}, avg: {avg_temperature} "
-
-@app.route('/shtData', methods=['GET', 'POST'])
+@app.route('/shtData', methods=['POST'])
 def get_sht_data():
     if request.method == 'POST':
         data = request.get_json()  # Retrieve JSON data from the request
 
         # Process the received data as needed
         air_quality_level = data.get('airQualityLevel')
-        eCO2 = data.get('eCO2')
-        TVOC = data.get('TVOC')
+        eco2 = data.get('eCO2')
+        tvoc = data.get('TVOC')
+    
+        # Add new ShtData table row
+        sht_data = ShtData(air_quality=air_quality_level, eco2=eco2, tvoc=tvoc).create()
 
         # Additional logic to handle the received data
         print("Received data:")
         print("Air Quality Level:", air_quality_level)
-        print("eCO2:", eCO2)
-        print("TVOC:", TVOC)
+        print("eco2:", eco2)
+        print("tvoc:", tvoc)
 
         return "Data received successfully"  # Send a response back if desired
 
 
-
 ##### Main #####
 if __name__ == '__main__':
-    app.run(host='192.168.137.1', port=5000, debug=True)
+    app.run(port=5000, debug=True)
