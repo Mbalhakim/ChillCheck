@@ -205,13 +205,22 @@ def get_mlx_data():
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
-    """Receive and send data of the SHT21 sensor"""
-    if request.method == 'GET':
-        # Send SHT data when requested by the dashboard
-        pass
     if request.method == 'POST':
-        # Receive data from the SHT sensor and store it in the database
-        pass
+        data = request.get_json()  # Retrieve JSON data from the request
+
+        # Process the received data as needed
+        air_quality_level = data.get('airQualityLevel')
+        eCO2 = data.get('eCO2')
+        TVOC = data.get('TVOC')
+
+        # Additional logic to handle the received data
+        print("Received data:")
+        print("Air Quality Level:", air_quality_level)
+        print("eCO2:", eCO2)
+        print("TVOC:", TVOC)
+
+        return "Data received successfully"  # Send a response back if desired
+
 
 
 ##### Main #####
