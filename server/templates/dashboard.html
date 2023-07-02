@@ -27,20 +27,20 @@
                                 <div class="row row-box mb-3">
                                     <div class="col-4">
                                         <div class="temp-box p-2">
-                                            <h6 class="mb-3">Luchttemperatuur</h6>
-                                            <h6 class="text-highlighted">21&deg;</h6>
+                                            <h6 class="mb-3">Gemiddelde Stralingstemperatuur</h6>
+                                            <h6 class="text-highlighted">{{data.cards.avgTemp}}&deg;</h6>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="temp-box p-2">
-                                            <h6 class="mb-3">Stralingstemperatuur</h6>
-                                            <h6 class="text-highlighted">23&deg;</h6>
+                                            <h6 class="mb-3">Min/Max Stralingstemperatuur</h6>
+                                            <h6 class="text-highlighted">Min:{{data.cards.minTemp}}&deg;<br />Max:{{data.cards.maxTemp}}&deg;</h6>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="temp-box p-2">
-                                            <h6 class="mb-3">Luchtvochtigheid</h6>
-                                            <h6 class="text-highlighted">49%</h6>
+                                            <h6 class="mb-3">Luchtkwaliteit</h6>
+                                            <h6 class="text-highlighted">{{data.cards.airQuality}}</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -49,14 +49,14 @@
                                 <div class="row row-box mb-3">
                                     <div class="col-6">
                                         <div class="temp-box p-2">
-                                            <h6 class="mb-3">Min/max</h6>
-                                            <h6 class="text-highlighted">Min:{{data.minTemp}}<br />Max:{{data.maxTemp}}</h6>
+                                            <h6 class="mb-3">eCO2</h6>
+                                            <h6 class="text-highlighted">{{data.cards.eco2}}</h6>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="temp-box p-2">
-                                            <h6 class="mb-3">Gemiddelde</h6>
-                                            <h6 class="text-highlighted">{{data.avgTemp}}</h6>
+                                            <h6 class="mb-3">TVOC</h6>
+                                            <h6 class="text-highlighted">{{data.cards.tvoc}}</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -65,10 +65,16 @@
                         <!-- Dagelijks gemiddeldes -->
                         <div class="temp-box h-auto mb-4">
                             <div class="p-4">
-                                <h6 class="mb-0">Dagelijks gemiddeldes</h6>
+                                <h6 class="mb-0">Dagelijkse Stralingstemperatuur</h6>
                             </div>
                             <div class="graph text-center">
-                                <canvas id="myChart"></canvas>
+                                <canvas id="mlxChart"></canvas>
+                            </div>
+                            <div class="p-4">
+                                <h6 class="mb-0">Dagelijkse eCO2 en TVOC</h6>
+                            </div>
+                            <div class="graph text-center">
+                                <canvas id="shtChart"></canvas>
                             </div>
                         </div>
                         {% include 'advies.html'%}
@@ -78,30 +84,85 @@
         </main>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.min.js"></script>
         <script>
-            var ctx = document.getElementById('myChart').getContext('2d');
-            var myChart = new Chart(ctx, {
+            var mlxChartElement = document.getElementById('mlxChart').getContext('2d');
+            var mlxChart = new Chart(mlxChartElement, {
                 type: 'line',
                 data: {
                     labels: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
                     datasets: [{
-                        label: 'Min temp',
-                        data: ["{{data.min_graph.min01}}", "{{data.min_graph.min02}}", "{{data.min_graph.min03}}", "{{data.min_graph.min04}}", "{{data.min_graph.min05}}", "{{data.min_graph.min06}}", "{{data.min_graph.min07}}"],
+                        label: 'Min',
+                        data: ["{{data.mlxGraph.min.min01}}", "{{data.mlxGraph.min.min02}}", "{{data.mlxGraph.min.min03}}", "{{data.mlxGraph.min.min04}}", "{{data.mlxGraph.min.min05}}", "{{data.mlxGraph.min.min06}}", "{{data.mlxGraph.min.min07}}"],
                         fill: false,
                         borderColor: 'rgb(54, 162, 235)',
                         borderWidth: 0,
                         tension: 0.1
                     }, {
-                        label: 'Max temp',
-                        data: ["{{data.max_graph.max01}}", "{{data.max_graph.max02}}", "{{data.max_graph.max03}}", "{{data.max_graph.max04}}", "{{data.max_graph.max05}}", "{{data.max_graph.max06}}", "{{data.max_graph.max07}}"],
+                        label: 'Max',
+                        data: ["{{data.mlxGraph.max.max01}}", "{{data.mlxGraph.max.max02}}", "{{data.mlxGraph.max.max03}}", "{{data.mlxGraph.max.max04}}", "{{data.mlxGraph.max.max05}}", "{{data.mlxGraph.max.max06}}", "{{data.mlxGraph.max.max07}}"],
                         fill: false,
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 0,
                         tension: 0.1
                     }, {
-                        label: 'Avg temp',
-                        data: ["{{data.avg_graph.avg01}}", "{{data.avg_graph.avg02}}", "{{data.avg_graph.avg03}}", "{{data.avg_graph.avg04}}", "{{data.avg_graph.avg05}}", "{{data.avg_graph.avg06}}", "{{data.avg_graph.avg07}}"],
+                        label: 'Avg',
+                        data: ["{{data.mlxGraph.avg.avg01}}", "{{data.mlxGraph.avg.avg02}}", "{{data.mlxGraph.avg.avg03}}", "{{data.mlxGraph.avg.avg04}}", "{{data.mlxGraph.avg.avg05}}", "{{data.mlxGraph.avg.avg06}}", "{{data.mlxGraph.avg.avg07}}"],
                         fill: false,
                         borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 0,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                drawTicks: false,
+                                drawBorder: false
+                            },
+                            gridLines: {
+                                display: true,
+                                drawBorder: true
+                            },
+                            scaleLabel: {
+                                display: true
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                suggestedMax: 100,
+                                stepSize: 10
+                            },
+                            gridLines: {
+                                display: true,
+                                drawBorder: true
+                            },
+                            scaleLabel: {
+                                display: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+
+            var shtChartElement = document.getElementById('shtChart').getContext('2d');
+            var shtChart = new Chart(shtChartElement, {
+                type: 'line',
+                data: {
+                    labels: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
+                    datasets: [{
+                        label: 'eCO2',
+                        data: ["{{data.shtGraph.eco2.eco2_01}}", "{{data.shtGraph.eco2.eco2_02}}", "{{data.shtGraph.eco2.eco2_03}}", "{{data.shtGraph.eco2.eco2_04}}", "{{data.shtGraph.eco2.eco2_05}}", "{{data.shtGraph.eco2.eco2_06}}", "{{data.shtGraph.eco2.eco2_07}}"],
+                        fill: false,
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 0,
+                        tension: 0.1
+                    }, {
+                        label: 'TVOC',
+                        data: ["{{data.shtGraph.tvoc.tvoc_01}}", "{{data.shtGraph.tvoc.tvoc_02}}", "{{data.shtGraph.tvoc.tvoc_03}}", "{{data.shtGraph.tvoc.tvoc_04}}", "{{data.shtGraph.tvoc.tvoc_05}}", "{{data.shtGraph.tvoc.tvoc_06}}", "{{data.shtGraph.tvoc.tvoc_07}}"],
+                        fill: false,
+                        borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 0,
                         tension: 0.1
                     }]
