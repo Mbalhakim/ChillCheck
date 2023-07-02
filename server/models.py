@@ -48,8 +48,21 @@ class MlxData():
         Database().delete_by_id("MlxData", id_)
     
 class ShtData():
-    def __init__():
-        pass
+    def __init__(self, id_ = 0, air_quality = "", eco2 = 0.0, tvoc = 0.0, created_at = ""):
+        self.id_ = id_
+        self.air_quality = air_quality
+        self.eco2 = eco2
+        self.tvoc = tvoc
+        self.created_at = created_at
+    
+    def find(self, column, value):
+        return Database().find("Feedback", column, value)
+
+    def create(self):
+        query = 'INSERT INTO ShtData (air_quality, eco2, tvoc) values (?, ?, ?)'
+        data = (self.air_quality, self.eco2, self.tvoc)
+        Database().create(query, data)
+        return self
 
 class Feedback():
     def __init__(self, id_ = 0, room = 0, feedback_slider = 0, feedback_text = "", created_at = ""):
