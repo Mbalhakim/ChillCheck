@@ -202,6 +202,8 @@ def get_mlx_data():
 
         cur.close()
         con.close()
+        print(f"data= min: {min_temperature}, max: {max_temperature}, avg: {avg_temperature} ")
+    return f"data= min: {min_temperature}, max: {max_temperature}, avg: {avg_temperature} "
 
 @app.route('/shtData', methods=['GET', 'POST'])
 def get_sht_data():
@@ -225,4 +227,4 @@ def get_sht_data():
 
 ##### Main #####
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(host='192.168.137.1', port=5000, debug=True)
