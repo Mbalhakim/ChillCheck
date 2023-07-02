@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -5,7 +6,6 @@
 #include "MLX90640_API.h"
 #include "MLX90640_I2C_Driver.h"
 #include <Adafruit_SGP30.h>
-
 Adafruit_SGP30 sgp;
 const byte MLX90640_address = 0x33; //Default 7-bit unshifted address of the MLX90640
 const char* ssid = "lenovo-mh";
@@ -22,31 +22,17 @@ static float mlx90640To[768];
 paramsMLX90640 mlx90640;
 
 bool isConnected() {
-  Wire.beginTransmission((uint8_t)MLX90640_address);
-  if (Wire.endTransmission() == 0) {
-    return true;
+    Wire.beginTransmission((uint8_t)MLX90640_address);
+    if (Wire.endTransmission() == 0) {
+      return true;
+    }
+    return false;
   }
-  return false;
-}
-
-String getAirQualityLevel() {
-  float eCO2 = sgp.eCO2;
-  float TVOC = sgp.TVOC;
-
-  if (eCO2 < 800 && TVOC < 1000) {
-    return "Good";
-  } else if (eCO2 >= 800 && eCO2 < 1000 && TVOC >= 1000 && TVOC < 2000) {
-    return "Moderate";
-  } else if (eCO2 >= 1000 && eCO2 < 1200 && TVOC >= 2000 && TVOC < 3000) {
-    return "Poor";
-  } else {
-    return "Unhealthy";
-  }
-}
-
-
 
 void setup() {
+
+  
+
   Wire.begin();
   Wire.setClock(400000); //Increase I2C clock speed to 400kHz
 
@@ -55,17 +41,18 @@ void setup() {
   Serial.println("MLX90640 IR Array Example");
 
   if (!sgp.begin()) {
-    Serial.println("SGP30 sensor not found");
-    while (1);
+  Serial.println("SGP30 sensor not found");
+  while (1);
   }
   Serial.println("SGP30 sensor initialized");
 
-  if (!isConnected()) {
+if (!isConnected()) {
     Serial.println("MLX90640 not detected at default I2C address. Please check wiring. Freezing.");
     while (1);
   }
+ 
 
-  Serial.println("MLX90640 online!");
+Serial.println("MLX90640 online!");
 
   // Connect to Wi-Fi network
   WiFi.begin(ssid, password);
@@ -95,21 +82,47 @@ void setup() {
   // Once params are extracted, we can release eeMLX90640 array
 }
 
+
 void loop() {
+
   if (!sgp.IAQmeasure()) {
     Serial.println("Error reading sensor data!");
     return;
   }
+String airQualityLevel = getAirQualityLevel();
+  Serial.println("Air Quality Level: " + airQualityLevel);
 
-   // Get air quality level, eCO2, and TVOC
+  delay(1000);
+}
+
+String getAirQualityLevel() {
+  float eCO2 = sgp.eCO2;
+  float TVOC = sgp.TVOC;
+
+  if (eCO2 < 800 && TVOC < 1000) {
+    return "Good";
+  } else if (eCO2 >= 800 && eCO2 < 1000 && TVOC >= 1000 && TVOC < 2000) {
+    return "Moderate";
+  } else if (eCO2 >= 1000 && eCO2 < 1200 && TVOC >= 2000 && TVOC < 3000) {
+    return "Poor";
+  } else {
+    return "Unhealthy";
+  }
+
+  Serial.print("eCO2: ");
+  Serial.print(sgp.eCO2);
+  Serial.print(" ppm\tTVOC: ");
+  Serial.print(sgp.TVOC);
+  Serial.println(" ppb");
+
+  delay(1000);
 
 
-  // Send the POST request to the server
- 
-  
+
 
   long startTime = millis();
-  for (byte x = 0 ; x < 2 ; x++) {
+  for (byte x = 0 ; x < 2 ; x++)
+  {
     uint16_t mlx90640Frame[834];
     int status = MLX90640_GetFrameData(MLX90640_address, mlx90640Frame);
 
@@ -123,77 +136,73 @@ void loop() {
   }
   long stopTime = millis();
 
-  for (int x = 0 ; x < 768 ; x++) {
+  for (int x = 0 ; x < 768 ; x++)
+  {
+    //if(x % 8 == 0) Serial.println();
     Serial.print(mlx90640To[x], 2);
     Serial.print(",");
   }
   Serial.println("");
   delay(1000);
 
-  // Serialize the JSON object to a string
-  // Define a String to hold the CSV data
-  String csvString;
-
-  // Loop over all the pixels and add their temperatures to the CSV data
-  for (int y = 0; y < 24; y++) {
-    for (int x = 0; x < 32; x++) {
-      // Calculate the pixel index based on its row and column
-      int pixelIndex = y * 32 + x;
-
-      // Add the pixel temperature to the CSV string
-      csvString += String(mlx90640To[pixelIndex]) + ",";
-    }
-  }
-
-  // Remove the trailing comma from the CSV string
-  csvString.remove(csvString.length() - 1);
-
-  // Send the POST request to the server
-  HTTPClient http;
-  http.begin(serverAddress);
-  http.addHeader("Content-Type", "text/csv");
-  int httpResponseCode = http.POST(csvString);
-
-  // Check for errors
-  if (httpResponseCode > 0) {
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
-  } else {
-    Serial.print("Error code: ");
-    Serial.println(httpResponseCode);
-  }
-
-  // Free resources
-  http.end();
-  delay(1000);
-
-  // ...
-
-  // Get air quality level, eCO2, and TVOC
-   // Get air quality level, eCO2, and TVOC
-  String airQualityLevel = getAirQualityLevel();
-  float eCO2 = sgp.eCO2;
-  float TVOC = sgp.TVOC;
-
-  // Create a JSON object
-  StaticJsonDocument<200> jsonDocument;
-  jsonDocument["airQualityLevel"] = airQualityLevel;
-  jsonDocument["eCO2"] = eCO2;
-  jsonDocument["TVOC"] = TVOC;
-
-  // Serialize the JSON object to a string
-  String jsonString;
-  serializeJson(jsonDocument, jsonString);
-
-  // Send the POST request to the server
-    HTTPClient SGPHTTP;
-  SGPHTTP.begin(serverAddressSh21); // Renamed to SGPHTTP
-  SGPHTTP.addHeader("Content-Type", "application/json");
-  int SGPHTTPResponseCode = SGPHTTP.POST(jsonString); // Renamed to SGPHTTP
-
-  // ...
-
-  delay(1000);
  
 
+  // Serialize the JSON object to a string
+  // Define a String to hold the CSV data
+String csvString;
+
+// Loop over all the pixels and add their temperatures to the CSV data
+for (int y = 0; y < 24; y++) {
+  for (int x = 0; x < 32; x++) {
+    // Calculate the pixel index based on its row and column
+    int pixelIndex = y * 32 + x;
+
+    // Add the pixel temperature to the CSV string
+    csvString += String(mlx90640To[pixelIndex]) + ",";
+  }
 }
+
+// Remove the trailing comma from the CSV string
+csvString.remove(csvString.length() - 1);
+
+// Send the POST request to the server
+HTTPClient http;
+http.begin(serverAddress);
+http.addHeader("Content-Type", "text/csv");
+int httpResponseCode = http.POST(csvString);
+
+// Check for errors
+if (httpResponseCode > 0) {
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
+} else {
+  Serial.print("Error code: ");
+  Serial.println(httpResponseCode);
+}
+
+// Free resources
+http.end();
+delay(30000);
+
+HTTPClient http;
+http.begin(serverAddressSh21);
+http.addHeader("Content-Type", "text/csv");
+int httpResponseCode2 = http.POST("success");
+
+// Check for errors
+if (httpResponseCode2 > 0) {
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode2);
+} else {
+  Serial.print("Error code: ");
+  Serial.println(httpResponseCode2);
+}
+
+// Free resources
+http.end();
+
+}
+
+
+
+   
