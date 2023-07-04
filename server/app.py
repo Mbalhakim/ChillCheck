@@ -10,7 +10,7 @@ import hashlib
 
 import requests
 import json
-
+import re
 
 # Used to get environment variables
 load_dotenv()
@@ -36,7 +36,7 @@ def logout():
 # Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'user_id' in session:
+    if session['is_admin'] != 1:
         return redirect('dashboard')
     
     conn = sqlite3.connect("acs.db")
@@ -60,6 +60,18 @@ def register():
 
         hashed_pw = hash_password(password)
         
+        def verify_email(emaill):
+            pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+            match = re.match(pattern, emaill)    
+            if match:
+                return True
+            else:
+                return False
+        
+        if verify_email(email) == False:
+            flash("De ingevoerde email is niet geldig!")
+            return render_template('register.html')
+        
         cursor.execute("SELECT * FROM User WHERE email=?", (email,))
         if cursor.fetchone() is not None:
             flash("De ingevoerde email is al in gebruik!")
@@ -68,7 +80,7 @@ def register():
             cursor.execute("INSERT INTO User (first_name, last_name, email, password, role, company, date_of_birth, account_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                            (first_name, last_name, email, hashed_pw, role, company, birth_date, account_type, created_at))
             conn.commit()
-            flash("Bedankt voor de registratie. Er kan nu ingelogd worden!")
+            flash("Gebruiker is toevoegd!")
             return render_template('register.html')
 
     return render_template('register.html')

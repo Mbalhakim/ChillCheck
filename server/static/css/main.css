@@ -123,8 +123,9 @@ body{
     background-size: cover;
 }
 .login-form{
-    top: 160px;
+    top: 90px;
     position: relative;
+    padding-bottom: 60px!important;
 }
 .input{
     background-color: #0B7275!important;

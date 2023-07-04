@@ -11,6 +11,7 @@
     <title>Login</title>
 </head>
 <body class="login-bg">
+    {% include 'navbar.html' %}
     <div class="container-fluid">
         {% for message in get_flashed_messages() %}
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -33,7 +34,6 @@
                     <div class="mb-3"><input class="form-control input rounded-0" type="text" id="role" name="role" placeholder="Functie" required></div>
                     <div class="mb-3"><input class="form-control input rounded-0" type="password" id="password" name="password" placeholder="Wachtwoord" required></div>
                     <div class="mb-3"><input class="btn text-white submit rounded-0 w-100" type="submit" id="submit" name="submit"></div>
-                    <a class="btn text-white submit rounded-0 w-100 text-decoration-none" href="{{ url_for('login') }}">Inloggen</a>
                 </form>
             </div>
         </div>
