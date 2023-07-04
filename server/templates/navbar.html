@@ -1,13 +1,14 @@
 <nav class="nav-bar">
-    <a class="nav-logo" href="#">
+    <a class="nav-logo" href="{{ url_for('dashboard') }}">
         <img src="../static/images/logo.png" alt="">
     </a>
     <ul class="nav-list">
-        {%if session['loggedin']%}
         <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
         <li class="nav-item"><a href="/feedback">Feedback</a></li>
-        <li class="nav-item"><a href="/logout">Uitloggen</a></li>
-        {%endif%}
-        <li class="nav-item"><a href="#">Mijn Account</a></li>
+        <li class="nav-item"><a href="mailto:info@acs-buildings.com">Support</a></li>
+        {% if session.is_admin == 1 %}
+            <li class="nav-item"><a class="text-white nav-item" href="{{ url_for('register') }}">Gebruiker aanmaken</a></li>
+        {% endif %}
+        <li class="nav-item"><a href="{{ url_for('logout') }}">Uitloggen</a></li>
     </ul>
 </nav>

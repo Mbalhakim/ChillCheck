@@ -1,11 +1,16 @@
 from dotenv import load_dotenv
 import os
 from flask import *
-import sqlite3 as sql
+import sqlite3
 from db import *
 from models import *
-import db
 from datetime import date
+
+import bcrypt
+import hashlib
+import requests
+import json
+import re
 
 # Used to get environment variables
 load_dotenv()
@@ -34,6 +39,7 @@ def csv_to_json(csv_string):
 # Render home/login page
 @app.route('/')
 def index():
+    
     return render_template('login.html')
 
 # Logout
@@ -44,49 +50,87 @@ def logout():
     return redirect('/')
 
 # Register
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # Add to db
-        user = User(firstname=form.firstname.data,
-                    lastname=form.lastname.data,
-                    email=form.email.data,
-                    username=form.username.data, 
-                    password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+    if session['is_admin'] != 1:
+        return redirect('dashboard')
+    
+    conn = sqlite3.connect("acs.db")
+    cursor = conn.cursor()
+    
+    def hash_password(password):
+        # Hash the password using SHA-256
+        hash_object = hashlib.sha256(password.encode())
+        return hash_object.hexdigest()
 
-        flash('Bedankt voor de registratie. Er kan nu ingelogd worden!')
-        return redirect(url_for('user.login'))
-    return render_template('register.html', form=form)
+    if request.method == 'POST':
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        company = request.form.get('company')
+        birth_date = request.form.get('birth_date')
+        role = request.form.get('role')
+        account_type = 2
+        created_at = date.today()
+
+        hashed_pw = hash_password(password)
+        
+        def verify_email(emaill):
+            pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+            match = re.match(pattern, emaill)    
+            if match:
+                return True
+            else:
+                return False
+        
+        if verify_email(email) == False:
+            flash("De ingevoerde email is niet geldig!")
+            return render_template('register.html')
+        
+        cursor.execute("SELECT * FROM User WHERE email=?", (email,))
+        if cursor.fetchone() is not None:
+            flash("De ingevoerde email is al in gebruik!")
+            return render_template('register.html')
+        else:
+            cursor.execute("INSERT INTO User (first_name, last_name, email, password, role, company, date_of_birth, account_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                           (first_name, last_name, email, hashed_pw, role, company, birth_date, account_type, created_at))
+            conn.commit()
+            flash("Gebruiker is toevoegd!")
+            return render_template('register.html')
+
+    return render_template('register.html')
 
 # Login
 @app.route('/login', methods=['GET','POST'])
 def login():
-    """Checkt of een gebruiker een actieve login sessie heeft. Nee? Laat login pagina zien. Ja? Laat index zien"""
-    #maak db connectie
-    con = Database().get_connection()
-    cur = Database().get_cursor(con)
-    if 'loggedin' in session.keys() and session['loggedin']: #omslachtige dubbele check om een undefined keys foutmelding te voorkomen
-        return redirect('/') #als er al een actieve login sessie is -> ga naar index
-    else:
-        if request.method == 'POST': #als er een inlog request is gedaan
-            username = request.form.get('email')
-            password = request.form.get('password')
+    if 'user_id' in session:
+        return redirect('dashboard')
+    conn = sqlite3.connect("acs.db")
+    cursor = conn.cursor()
+    
+    def hash_password(password):
+        # Hash the password using SHA-256
+        hash_object = hashlib.sha256(password.encode())
+        return hash_object.hexdigest()
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-            cur.execute('SELECT * FROM User WHERE email = ? AND password = ?', (username, password))
-            #kan hier geen db class gebruiken: meerdere parameters
-            row = cur.fetchone()
+        hashed_password = hash_password(password)
 
-            if row: #als een account matcht aan de logingegevens
-                session['loggedin'] = True
-                session['email'] = row['email']
-                session['id'] = row['id']
-                return redirect('/dashboard')#index + succes melding na geslaagde inlogpoging
-            session['loggedin'] = False
-            return render_template('login.html', error = 'Incorrecte inloggegevens. \n')#standaard render + foutmelding na foutieve inlogpoging
-        return(render_template('login.html'))#standaard render voor post
+        # Retrieve the user from the database
+        cursor.execute("SELECT * FROM User WHERE email=? AND password=?", (email, hashed_password))
+        user = cursor.fetchone()
+        if user is not None:
+            session['user_id'] = user[0]
+            session['is_admin'] = user[8]
+            return redirect('dashboard')
+        else:
+            flash("Ongeldige gebruikersnaam of wachtwoord.")
+            return render_template('login.html')
+    return render_template('login.html')
 
 
 ##### Dashboard page #####
@@ -94,7 +138,7 @@ def login():
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
     # fetch mlx data from database
-    if request.method == 'GET' and 'loggedin' in session.keys() and session['loggedin']:
+    if request.method == 'GET' and 'user_id' in session:
         con = Database().get_connection()
         cur = Database().get_cursor(con)
 
@@ -211,32 +255,43 @@ def dashboard():
 # Render Feedback pagina
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
-    if request.method == 'POST' and 'loggedin' in session.keys() and session['loggedin']:
+    if request.method == 'POST' and 'user_id' in session:
         feedback_slider_value = int(request.form.get('feedback-slider'))
         feedback_text = request.form.get('feedback-text')
         feedback_room = request.form.get('feedback-room')
         
-        if feedback_slider_value < -48 and feedback_slider_value > -51:
-            fb = Feedback(room=feedback_room, feedback_slider=1, feedback_text=feedback_text).create()
-        elif feedback_slider_value < -30:
-            fb = Feedback(room=feedback_room, feedback_slider=2, feedback_text=feedback_text).create()
-        elif feedback_slider_value < -15:
-            fb = Feedback(room=feedback_room, feedback_slider=3, feedback_text=feedback_text).create()
-        elif feedback_slider_value < 15:
-            fb = Feedback(room=feedback_room, feedback_slider=4, feedback_text=feedback_text).create()
-        elif feedback_slider_value < 30:
-            fb = Feedback(room=feedback_room, feedback_slider=5, feedback_text=feedback_text).create()
-        elif feedback_slider_value < 48:
-            fb = Feedback(room=feedback_room, feedback_slider=6, feedback_text=feedback_text).create()
-        elif feedback_slider_value < 51:
-            fb = Feedback(room=feedback_room, feedback_slider=7, feedback_text=feedback_text).create()
         
-        if fb:
+        if feedback_slider_value < -48 and feedback_slider_value > -51:
+            Feedback(room=feedback_room, feedback_slider=1, feedback_text=feedback_text).create()
             flash("Feedback is verzonden")
-            return redirect("/dashboard")
+            return redirect("/feedback")
+        elif feedback_slider_value < -30:
+            Feedback(room=feedback_room, feedback_slider=2, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
+        elif feedback_slider_value < -15:
+            Feedback(room=feedback_room, feedback_slider=3, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
+        elif feedback_slider_value < 15:
+            Feedback(room=feedback_room, feedback_slider=4, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
+        elif feedback_slider_value < 30:
+            Feedback(room=feedback_room, feedback_slider=5, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
+        elif feedback_slider_value < 48:
+            Feedback(room=feedback_room, feedback_slider=6, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
+        elif feedback_slider_value < 51:
+            Feedback(room=feedback_room, feedback_slider=7, feedback_text=feedback_text).create()
+            flash("Feedback is verzonden")
+            return redirect("/feedback")
         
         return render_template("feedback.html")
-    elif request.method == 'GET' and 'loggedin' in session.keys() and session['loggedin']:
+    elif request.method == 'GET' and 'user_id' in session:
         return render_template("feedback.html")
     else:
         return redirect("/login")

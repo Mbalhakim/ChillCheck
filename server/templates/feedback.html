@@ -15,6 +15,12 @@
     </head>
     <body>
         {% include 'navbar.html' %}
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
         <main>
             <form class="fb-box" method="POST" action="/feedback">
                 <div class="p-4">
