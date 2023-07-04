@@ -97,6 +97,7 @@ def login():
         user = cursor.fetchone()
         if user is not None:
             session['user_id'] = user[0]
+            session['is_admin'] = user[8]
             return redirect('dashboard')
         else:
             flash("Ongeldige gebruikersnaam of wachtwoord.")
